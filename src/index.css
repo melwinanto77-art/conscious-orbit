@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/* ============================================================
+   THE CONSCIOUS ORBIT — Royal Design System
+   Golden-red gradient · glassmorphism · shimmering gold accents
+   ============================================================ */
+
+@theme {
+  /* Royal font families */
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  /* Royal palette — neutral stone base + amber accent + rose glow */
+  --color-royal-bg: #0c0a09;       /* stone-950 */
+  --color-royal-panel: #1c1917;    /* stone-900 */
+  --color-gold: #f59e0b;           /* amber-500 */
+  --color-gold-bright: #fcd34d;    /* amber-300 */
+  --color-gold-deep: #b45309;      /* amber-700 */
+  --color-rose-deep: #4c0519;      /* rose-950 */
+}
+
+/* Base layer — body background + global text */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-sans);
+    color: #f5f5f4;                /* stone-100 — neutral base text */
+    background-color: #0c0a09;     /* stone-950 */
+    /* Ambient royal glows: rose + amber radials over neutral stone base */
+    background-image:
+      radial-gradient(ellipse 60% 50% at 25% 0%, rgba(76, 5, 25, 0.45), transparent 60%),
+      radial-gradient(ellipse 50% 50% at 85% 100%, rgba(120, 53, 15, 0.22), transparent 60%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ============================================================
+   Reusable component utilities
+   ============================================================ */
+
+/* Glassmorphism panel — used for cards / panels */
+.glass {
+  background: rgba(12, 10, 9, 0.55);          /* stone-950/55 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(245, 158, 11, 0.20); /* amber-500/20 */
+}
+
+/* Shimmering gold text for accents / headers */
+.text-shimmer-gold {
+  background: linear-gradient(110deg, #fde68a 0%, #fbbf24 30%, #fcd34d 50%, #f59e0b 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+
+/* Glowing gold focus / hover ring for form fields */
+.field-glow {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+.field-glow:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+}
+.field-glow:focus {
+  outline: none;
+  border-color: rgba(251, 191, 36, 0.9);       /* amber-400 */
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5);
+  background-color: rgba(28, 25, 23, 0.7);      /* stone-900/70 */
+}
+
+/* Royal gold gradient button surface */
+.btn-royal {
+  background-image: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%); /* amber-500 → amber-400 → amber-500 */
+  background-size: 200% auto;
+  color: #0c0a09;                              /* stone-950 */
+  transition: background-position 0.4s ease, box-shadow 0.3s ease, transform 0.15s ease;
+}
+.btn-royal:hover {
+  background-position: right center;
+  filter: brightness(1.08);
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.30);
+}
+.btn-royal:active {
+  transform: scale(0.99);
+}
+
+/* Thin custom scrollbar (royal) */
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-track {
+  background: rgba(12, 10, 9, 0.5);
+}
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b45309, #4c0519);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #f59e0b, #b45309);
+}
+
+/* Custom range slider — gold thumb */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #92400e, #4c0519);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: 2px solid #0c0a09;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: 2px solid #0c0a09;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+
+/* Text selection — royal amber */
+::selection {
+  background: #f59e0b;
+  color: #0c0a09;
+}
