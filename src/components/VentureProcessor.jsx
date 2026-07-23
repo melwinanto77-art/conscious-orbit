@@ -7,12 +7,6 @@ import {
 } from 'lucide-react';
 import { GlassPanel, GhostButton } from './ui.jsx';
 
-/* ============================================================
-   VENTURE PROCESSOR — the conscious-orbit processing architecture
-   Stage → Core Modules → Key Input/Output → final Score Aggregator
-   ============================================================ */
-
-// Architecture definition (from spec)
 const PIPELINE = [
   {
     stage: 'RECEIVED',
@@ -93,11 +87,30 @@ const COLOR_MAP = {
   emerald: { text: 'text-emerald-300', border: 'border-emerald-400/40', bg: 'bg-emerald-500/10', glow: 'rgba(16,185,129,0.4)',   dot: 'bg-emerald-400' },
 };
 
-export default function VentureProcessor() {
-  const [activeStage, setActiveStage] = useState(0);
+const statusOrder = ['RECEIVED', 'PENDING', 'PROCESSED', 'PUBLISHED'];
+
+export default function VentureProcessor({
+  activeReport,
+  onStatusChange,
+  onScoreChange,
+  computedScore,
+  computedSubScores,
+  computedDecision,
+}) {
+  const initialStage = statusOrder.indexOf(activeReport?.status);
+  const [activeStage, setActiveStage] = useState(initialStage >= 0 ? initialStage : 0);
   const [isRunning, setIsRunning] = useState(false);
-  const [runStep, setRunStep] = useState(-1); // -1 = idle, 0-4 = processing each stage, 5 = done
-  const [score, setScore] = useState(86);
+  const [runStep, setRunStep] = useState(-1); // -1 = idle, 0-3 = processing each stage
+
+  // Keep activeStage in sync with report's status if not running
+  useEffect(() => {
+    if (!isRunning && activeReport) {
+      const idx = statusOrder.indexOf(activeReport.status);
+      if (idx >= 0) {
+        setActiveStage(idx);
+      }
+    }
+  }, [activeReport, isRunning]);
 
   // Run the full pipeline simulation
   const runPipeline = () => {
@@ -110,16 +123,79 @@ export default function VentureProcessor() {
   useEffect(() => {
     if (!isRunning) return;
     if (runStep < 0) return;
-    if (runStep >= 5) {
-      const t = setTimeout(() => { setIsRunning(false); }, 600);
-      return () => clearTimeout(t);
+    if (runStep >= 4) {
+      setIsRunning(false);
+      setRunStep(-1);
+      return;
     }
     setActiveStage(runStep);
-    const t = setTimeout(() => setRunStep((s) => s + 1), 1100);
+    
+    // Call parent to update status
+    if (onStatusChange) {
+      onStatusChange(statusOrder[runStep]);
+    }
+    
+    const t = setTimeout(() => setRunStep((s) => s + 1), 1200);
     return () => clearTimeout(t);
-  }, [runStep, isRunning]);
+  }, [runStep, isRunning, onStatusChange]);
 
-  const isComplete = runStep >= 5;
+  const score = activeReport?.score ?? computedScore;
+  const isComplete = activeReport?.status === 'PUBLISHED';
+
+  // Customize dynamic detail rendering based on the active report details
+  const getDynamicDetail = (stageIndex) => {
+    if (!activeReport) return PIPELINE[stageIndex].detail;
+    
+    const p = activeReport.profile || {};
+    const c = activeReport.clusterData || {};
+    
+    if (stageIndex === 0) {
+      return [
+        { label: 'Business Idea / Problem', value: c.problemStatement || 'No problem statement defined yet.' },
+        { label: 'Venture Name', value: p.companyName || activeReport.name },
+        { label: 'Contact Info', value: p.contactInfo || 'Not specified' },
+      ];
+    } else if (stageIndex === 1) {
+      return [
+        { label: 'Model Classification', value: p.businessModel || 'Not classified' },
+        { label: 'Target Sector / Stage', value: `${p.industry || 'General'} · ${p.stage || 'Idea'}` },
+        { label: 'Ideal Company Profile', value: c.idealCustomerProfile || 'Not specified' },
+      ];
+    } else if (stageIndex === 2) {
+      if (activeReport.vertical === 'startups') {
+        const tam = activeReport.engineData?.tam ?? 50000000;
+        const samPct = activeReport.engineData?.samPct ?? 18;
+        const sam = Math.round(tam * (samPct / 100));
+        return [
+          { label: 'TAM (Total)', value: `$${tam.toLocaleString()}` },
+          { label: 'SAM (Serviceable)', value: `$${sam.toLocaleString()} (${samPct}%)` },
+          { label: 'Viability Verdict', value: 'Proceed with analysis' },
+        ];
+      } else if (activeReport.vertical === 'msmes') {
+        return [
+          { label: 'Workflow', value: activeReport.engineData?.workflow || 'Not specified' },
+          { label: 'Daily Friction', value: activeReport.engineData?.friction || 'Not specified' },
+          { label: 'Hours Lost / Wk', value: `${activeReport.engineData?.hoursLost ?? 0} hrs` },
+        ];
+      } else {
+        return [
+          { label: 'SOP Summary', value: activeReport.engineData?.processMap || 'Not specified' },
+          { label: 'Primary KPI', value: 'Maturity standard assessment' },
+        ];
+      }
+    } else {
+      return [
+        { label: 'Revenue Model', value: c.revenueModel || 'Not defined' },
+        { label: 'Launch Geography', value: c.launchGeography || 'Not specified' },
+        { label: 'Funding Ask', value: c.fundingAsk || 'Not specified' },
+      ];
+    }
+  };
+
+  const activeStageObj = {
+    ...PIPELINE[activeStage],
+    detail: getDynamicDetail(activeStage),
+  };
 
   return (
     <section className="space-y-8">
@@ -136,8 +212,7 @@ export default function VentureProcessor() {
             Venture Processing Pipeline
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-stone-400">
-            Every venture flows through four stages of modules, each transforming key inputs into the
-            outputs that feed the next — culminating in the <span className="text-amber-300">Conscious Orbital Score</span>.
+            Analyze venture <span className="text-amber-300">{activeReport?.name}</span> by running it through the complete pipeline.
           </p>
         </div>
         <div className="flex gap-3">
@@ -155,7 +230,7 @@ export default function VentureProcessor() {
             const c = COLOR_MAP[stage.color];
             const isActive = activeStage === idx;
             const isProcessing = isRunning && runStep === idx;
-            const isDone = isRunning && runStep > idx;
+            const isDone = isRunning ? runStep > idx : statusOrder.indexOf(activeReport?.status) >= idx;
             return (
               <div key={stage.stage} className="flex flex-1 items-center gap-3">
                 {/* Stage node */}
@@ -228,7 +303,13 @@ export default function VentureProcessor() {
 
         {/* Final Score Aggregator */}
         <div className="mt-5 border-t border-amber-500/15 pt-5">
-          <ScoreAggregator score={score} setScore={setScore} decision={isComplete || score >= 60 ? 1 : 0} isComplete={isComplete} />
+          <ScoreAggregator
+            score={score}
+            setScore={onScoreChange}
+            decision={computedDecision}
+            isComplete={isComplete}
+            subScores={computedSubScores}
+          />
         </div>
       </GlassPanel>
 
@@ -241,17 +322,14 @@ export default function VentureProcessor() {
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.3 }}
         >
-          <StageDetail stage={PIPELINE[activeStage]} index={activeStage} />
+          <StageDetail stage={activeStageObj} index={activeStage} />
         </motion.div>
       </AnimatePresence>
     </section>
   );
 }
 
-/* ============================================================
-   SCORE AGGREGATOR — final Conscious Orbital Score + 1/0 decision
-   ============================================================ */
-function ScoreAggregator({ score, setScore, decision, isComplete }) {
+function ScoreAggregator({ score, setScore, decision, isComplete, subScores }) {
   const verdict = score >= 75 ? 'HIGH VIABILITY' : score >= 50 ? 'MODERATE VIABILITY' : 'LOW VIABILITY';
   const verdictColor = score >= 75 ? 'text-emerald-300' : score >= 50 ? 'text-amber-300' : 'text-rose-300';
   const ringColor = score >= 75 ? '#10b981' : score >= 50 ? '#f59e0b' : '#f43f5e';
@@ -259,11 +337,11 @@ function ScoreAggregator({ score, setScore, decision, isComplete }) {
   const R = 52;
   const C = 2 * Math.PI * R;
 
-  const subScores = [
-    { label: 'Feasibility', value: 82, icon: ShieldCheck },
-    { label: 'Market Potential', value: 88, icon: TrendingUp },
-    { label: 'Pricing Power', value: 74, icon: DollarSign },
-    { label: 'GTM Viability', value: 90, icon: Target },
+  const displayScores = [
+    { label: 'Feasibility', value: subScores?.feasibility ?? 82, icon: ShieldCheck },
+    { label: 'Market Potential', value: subScores?.marketPotential ?? 88, icon: TrendingUp },
+    { label: 'Pricing Power', value: subScores?.pricingPower ?? 74, icon: DollarSign },
+    { label: 'GTM Viability', value: subScores?.gtmViability ?? 90, icon: Target },
   ];
 
   return (
@@ -303,7 +381,7 @@ function ScoreAggregator({ score, setScore, decision, isComplete }) {
           <p className={`mt-0.5 text-xs font-bold ${verdictColor}`}>{verdict}</p>
           {/* Interactive override */}
           <label className="mt-2 flex items-center gap-2 text-[0.62rem] text-stone-500">
-            <span>Weighting</span>
+            <span>Override</span>
             <input
               type="range" min={0} max={100} value={score}
               onChange={(e) => setScore(parseInt(e.target.value))}
@@ -315,7 +393,7 @@ function ScoreAggregator({ score, setScore, decision, isComplete }) {
 
       {/* Sub-scores */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-        {subScores.map((s) => (
+        {displayScores.map((s) => (
           <div key={s.label} className="rounded-xl border border-amber-500/15 bg-black/30 p-3">
             <div className="flex items-center gap-1.5">
               <s.icon size={12} className="text-amber-400" />
@@ -356,9 +434,6 @@ function ScoreAggregator({ score, setScore, decision, isComplete }) {
   );
 }
 
-/* ============================================================
-   STAGE DETAIL — expanded input/output for the active stage
-   ============================================================ */
 function StageDetail({ stage, index }) {
   const c = COLOR_MAP[stage.color];
   return (

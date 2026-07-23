@@ -45,10 +45,17 @@
 
 /* Glassmorphism panel — used for cards / panels */
 .glass {
-  background: rgba(12, 10, 9, 0.55);          /* stone-950/55 */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(245, 158, 11, 0.20); /* amber-500/20 */
+  background: linear-gradient(135deg, rgba(28, 25, 23, 0.45) 0%, rgba(12, 10, 9, 0.6) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.15); /* amber-500/15 */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.glass:hover {
+  border-color: rgba(245, 158, 11, 0.32);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 20px rgba(245, 158, 11, 0.05);
 }
 
 /* Shimmering gold text for accents / headers */
@@ -70,13 +77,14 @@
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 .field-glow:hover {
-  border-color: rgba(245, 158, 11, 0.45);
+  border-color: rgba(245, 158, 11, 0.35);
+  background-color: rgba(28, 25, 23, 0.4);
 }
 .field-glow:focus {
   outline: none;
-  border-color: rgba(251, 191, 36, 0.9);       /* amber-400 */
-  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5);
-  background-color: rgba(28, 25, 23, 0.7);      /* stone-900/70 */
+  border-color: rgba(251, 191, 36, 0.85);       /* amber-400 */
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2), 0 4px 20px rgba(0, 0, 0, 0.35);
+  background-color: rgba(28, 25, 23, 0.8);      /* stone-900/80 */
 }
 
 /* Royal gold gradient button surface */
@@ -85,14 +93,16 @@
   background-size: 200% auto;
   color: #0c0a09;                              /* stone-950 */
   transition: background-position 0.4s ease, box-shadow 0.3s ease, transform 0.15s ease;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
 }
 .btn-royal:hover {
   background-position: right center;
   filter: brightness(1.08);
-  box-shadow: 0 0 24px rgba(245, 158, 11, 0.30);
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.45);
+  transform: translateY(-1px);
 }
 .btn-royal:active {
-  transform: scale(0.99);
+  transform: translateY(0) scale(0.98);
 }
 
 /* Thin custom scrollbar (royal) */

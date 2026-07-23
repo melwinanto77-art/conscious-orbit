@@ -5,7 +5,7 @@ import {
   ChevronRight, Sparkles, FileText, LayoutDashboard, Settings,
   Layers, ClipboardList, Search, DollarSign, Cpu, Home,
   Users, TrendingUp, Download, CheckCircle2,
-  Plus, X, ChevronDown, Target, Zap,
+  Plus, X, ChevronDown, Target, Zap, ShieldCheck,
 } from 'lucide-react';
 import './App.css';
 import {
@@ -13,7 +13,10 @@ import {
   RoyalButton, GhostButton, StatusBadge, StatusDot, OrbitBrand,
 } from './components/ui.jsx';
 import VentureProcessor from './components/VentureProcessor.jsx';
-import { StartupMarketEngine, MsmeOptimizationEngine, IndustryAnalysisEngine } from './components/VerticalEngines.jsx';
+import {
+  StartupMarketEngine, MsmeOptimizationEngine, IndustryAnalysisEngine,
+  StudentMentorshipEngine, InstitutionalMaturityEngine
+} from './components/VerticalEngines.jsx';
 import Homepage from './components/Homepage.jsx';
 import Login from './components/Login.jsx';
 
@@ -36,10 +39,37 @@ const CLUSTER_TABS = [
   { id: 'launch',  name: 'Launch & Execution',           cluster: 'Cluster 3' },
 ];
 
-const FLAGSHIP_TRACKS = [
-  { id: 'validation', name: 'Startup Validation Track', desc: 'Validate problem-solution fit before committing capital.', icon: Target },
-  { id: 'opportunity', name: 'Market Opportunity Track', desc: 'Map TAM/SAM/SOM and competitive whitespace.', icon: TrendingUp },
-  { id: 'investor',   name: 'Investor-Ready Track',     desc: 'Sharpen narrative, unit economics & the ask.', icon: DollarSign },
+const TRACKS_BY_VERTICAL = {
+  startups: [
+    { id: 'validation', name: 'Startup Validation Track', desc: 'Validate problem-solution fit before committing capital.', icon: Target },
+    { id: 'opportunity', name: 'Market Opportunity Track', desc: 'Map TAM/SAM/SOM and competitive whitespace.', icon: TrendingUp },
+    { id: 'investor',   name: 'Investor-Ready Track',     desc: 'Sharpen narrative, unit economics & the ask.', icon: DollarSign },
+  ],
+  msmes: [
+    { id: 'bottleneck', name: 'Bottleneck Mapping Track', desc: 'Isolate operational friction points and calculate waste.', icon: Target },
+    { id: 'efficiency', name: 'Lean Efficiency Track', desc: 'Optimize team allocation and communication pipelines.', icon: TrendingUp },
+    { id: 'digital',    name: 'SaaS Integration Track', desc: 'Select low-code tools to automate manual approvals.', icon: Zap },
+  ],
+  industries: [
+    { id: 'governance', name: 'SOP & Governance Track', desc: 'Standardize cross-functional sign-offs and roles.', icon: ShieldCheck },
+    { id: 'quality',    name: 'Quality Assurance Track', desc: 'Align calibration schedules with defect targets.', icon: Target },
+    { id: 'scale',      name: 'System Scale Track',      desc: 'Model multi-department throughput and bottlenecks.', icon: Layers },
+  ],
+  students: [
+    { id: 'counseling', name: 'Academic Counseling Track', desc: 'Map course credits, timelines, and post-grad targets.', icon: GraduationCap },
+    { id: 'research',   name: 'Research Mentorship Track', desc: 'Format thesis drafts and coordinate guide feedback.', icon: FileText },
+    { id: 'project',    name: 'Project Capstone Track',    desc: 'Break project milestones into scoped weekly tasks.', icon: Target },
+  ],
+  institutions: [
+    { id: 'curriculum', name: 'Curriculum Alignment Track', desc: 'Audit educational outcomes against modern industry requirements.', icon: FileText },
+    { id: 'faculty',    name: 'Faculty Competency Track', desc: 'Track training milestones and certificate compliance.', icon: Users },
+    { id: 'diagnosis',  name: 'Institutional Health Track', desc: 'Survey stakeholders to run organizational SWOT diagnostics.', icon: Building2 },
+  ]
+};
+
+const BUILD_YOUR_OWN = [
+  'Market Sizing', 'Competitor Teardown', 'Pricing Strategy', 'GTM Plan',
+  'Financial Model', 'Risk Register', 'User Personas', 'OKR Framework',
 ];
 
 const KANBAN_COLUMNS = [
@@ -49,38 +79,409 @@ const KANBAN_COLUMNS = [
   { status: 'PUBLISHED', action: 'DELIVERED',   note: 'Generated scores & downloadable artifacts' },
 ];
 
-const BUILD_YOUR_OWN = [
-  'Market Sizing', 'Competitor Teardown', 'Pricing Strategy', 'GTM Plan',
-  'Financial Model', 'Risk Register', 'User Personas', 'OKR Framework',
+const SEED_REPORTS = [
+  {
+    id: 'r1',
+    name: 'EcoFly Medical Drones',
+    vertical: 'startups',
+    tags: ['Logistics', 'Healthcare'],
+    status: 'PUBLISHED',
+    score: 86,
+    profile: {
+      companyName: 'EcoFly Medical Drones',
+      industry: 'Logistics',
+      stage: 'Seed',
+      geography: 'Bengaluru, IN',
+      businessModel: 'B2B',
+      contactInfo: 'founder@ecofly.io',
+    },
+    clusterData: {
+      problemStatement: 'Rural clinics wait hours for emergency blood & vaccine deliveries.',
+      painPoint: 'Last-mile cold-chain breaks spoil 30% of medical cargo.',
+      willingnessToPay: '$15–25 per priority delivery',
+      idealCustomerProfile: 'Regional health networks, 50+ clinics',
+      revenueModel: 'Per-delivery + monthly retainer',
+      unitEconomics: '62% at scale',
+      keyCosts: 'Fleet, batteries, BVLOS compliance',
+      breakEvenTimeline: 'Month 18',
+      launchGeography: 'Karnataka pilot zone',
+      gtmMotion: 'Govt partnerships + NGO tenders',
+      keyMilestones: '3 hubs live · 10 clinics onboarded · BVLOS certified',
+      fundingAsk: '$1.2M seed',
+    },
+    selectedTracks: ['validation', 'investor'],
+    customPicks: ['Market Sizing'],
+    engineData: {
+      tam: 50000000,
+      samPct: 18,
+      channels: { direct: 40, partner: 25, online: 35 },
+      conversion: 8,
+    }
+  },
+  {
+    id: 'r2',
+    name: 'Apex AI Recruiter',
+    vertical: 'startups',
+    tags: ['HR Tech', 'SaaS'],
+    status: 'PROCESSED',
+    score: 72,
+    profile: {
+      companyName: 'Apex AI Recruiter',
+      industry: 'SaaS',
+      stage: 'Pre-Seed',
+      geography: 'San Francisco, US',
+      businessModel: 'B2B',
+      contactInfo: 'recruiter@apex.ai',
+    },
+    clusterData: {
+      problemStatement: 'Tech hiring is slow, taking 45+ days per engineering hire.',
+      painPoint: 'Technical screening wastes 60% of engineering managers\' time.',
+      willingnessToPay: '$199/mo per seat',
+      idealCustomerProfile: 'Fast-growing tech scaleups',
+      revenueModel: 'SaaS subscription',
+      unitEconomics: '85% gross margin',
+      keyCosts: 'LLM tokens, API hosting, outbound sales',
+      breakEvenTimeline: 'Month 6',
+      launchGeography: 'North America',
+      gtmMotion: 'LinkedIn outbound + product-led growth',
+      keyMilestones: 'Launch MVP · 20 beta clients · Integrate with ATS',
+      fundingAsk: '$500K pre-seed',
+    },
+    selectedTracks: ['validation', 'opportunity'],
+    customPicks: ['Competitor Teardown'],
+    engineData: {
+      tam: 12000000,
+      samPct: 25,
+      channels: { direct: 20, partner: 10, online: 70 },
+      conversion: 12,
+    }
+  },
+  {
+    id: 'r3',
+    name: 'GreenPack Biodegradable',
+    vertical: 'startups',
+    tags: ['Eco', 'Retail'],
+    status: 'PENDING',
+    score: 64,
+    profile: {
+      companyName: 'GreenPack Biodegradable',
+      industry: 'Eco',
+      stage: 'Idea',
+      geography: 'London, UK',
+      businessModel: 'B2B2C',
+      contactInfo: 'info@greenpack.co.uk',
+    },
+    clusterData: {
+      problemStatement: 'E-commerce packaging generates millions of tons of plastic waste.',
+      painPoint: 'Consumers demand eco-friendly options, but brands find compostables too fragile.',
+      willingnessToPay: '$0.40 per mailer bag',
+      idealCustomerProfile: 'D2C brands shipping >5k orders/mo',
+      revenueModel: 'Direct-to-brand wholesale',
+      unitEconomics: '45% margins at scale',
+      keyCosts: 'Raw bio-resins, molding machinery, certifications',
+      breakEvenTimeline: 'Month 24',
+      launchGeography: 'United Kingdom',
+      gtmMotion: 'Eco brand partnerships + trade shows',
+      keyMilestones: 'Material formulation sign-off · Pilot with 3 brands · Secure factory space',
+      fundingAsk: '$800K seed',
+    },
+    selectedTracks: ['validation'],
+    customPicks: ['Pricing Strategy'],
+    engineData: {
+      tam: 45000000,
+      samPct: 10,
+      channels: { direct: 50, partner: 30, online: 20 },
+      conversion: 5,
+    }
+  },
+  {
+    id: 'r4',
+    name: 'Nimbus Cloud Audit',
+    vertical: 'startups',
+    tags: ['Fintech', 'B2B'],
+    status: 'RECEIVED',
+    score: 0,
+    profile: {
+      companyName: 'Nimbus Cloud Audit',
+      industry: 'Fintech',
+      stage: 'Pre-Seed',
+      geography: 'New York, US',
+      businessModel: 'B2B',
+      contactInfo: 'audit@nimbus.io',
+    },
+    clusterData: {
+      problemStatement: 'Companies overspend on cloud infrastructure by 30% without realizing it.',
+      painPoint: 'Multi-cloud setups lack unified cost visibility and automated savings suggestions.',
+      willingnessToPay: '10% of generated savings',
+      idealCustomerProfile: 'Mid-market companies spending >$20k/mo on AWS/Azure',
+      revenueModel: 'Gainshare / commission-based',
+      unitEconomics: '92% margins',
+      keyCosts: 'Read-only API processing, cloud compute, SOC2 compliance',
+      breakEvenTimeline: 'Month 12',
+      launchGeography: 'Global SaaS',
+      gtmMotion: 'Product Hunt launch + AWS Marketplace co-selling',
+      keyMilestones: 'Connect 10 test accounts · Achieve $50k in audited savings · Launch v1.0',
+      fundingAsk: '$350K pre-seed',
+    },
+    selectedTracks: ['opportunity'],
+    customPicks: ['GTM Plan'],
+    engineData: {
+      tam: 80000000,
+      samPct: 15,
+      channels: { direct: 15, partner: 40, online: 45 },
+      conversion: 7,
+    }
+  },
+  {
+    id: 'r5',
+    name: 'Verdant Agri-Tech',
+    vertical: 'msmes',
+    tags: ['AgriTech'],
+    status: 'PROCESSED',
+    score: 78,
+    profile: {
+      companyName: 'Verdant Agri-Tech',
+      industry: 'AgriTech',
+      stage: 'Seed',
+      geography: 'Pune, IN',
+      businessModel: 'B2B',
+      contactInfo: 'contact@verdant.in',
+    },
+    clusterData: {
+      problemStatement: 'Smallholder farmers lack precise soil and weather metrics for crop selection.',
+      painPoint: 'Manual soil testing takes 10+ days; weather apps are too generic.',
+      willingnessToPay: '₹500 ($6) per test',
+      idealCustomerProfile: 'Farmer cooperatives, agro-input dealers',
+      revenueModel: 'Pay-per-test + agronomy advisory subscription',
+      unitEconomics: '55% gross margin',
+      keyCosts: 'Sensor probes, cellular data plans, local operations agents',
+      breakEvenTimeline: 'Month 18',
+      launchGeography: 'Maharashtra district',
+      gtmMotion: 'Dealer networks + NGO-sponsored farming camps',
+      keyMilestones: 'Deploy 50 field stations · Onboard 2,000 farmers · Launch Marathi mobile app',
+      fundingAsk: '$600K seed',
+    },
+    selectedTracks: ['bottleneck'],
+    customPicks: ['User Personas'],
+    engineData: {
+      team: 7,
+      hoursLost: 14,
+      hourlyRate: 35,
+      tools: 'excel',
+      workflow: 'Soil sample collected → sent to regional lab → manual report compiled → physical handoff to farmer',
+      friction: 'Lab testing backlog delays output by 12 days, letting planting seasons pass without data',
+    }
+  },
+  {
+    id: 'r6',
+    name: 'Helix Pharma Ops',
+    vertical: 'industries',
+    tags: ['Pharma'],
+    status: 'PUBLISHED',
+    score: 91,
+    profile: {
+      companyName: 'Helix Pharma Ops',
+      industry: 'Pharma',
+      stage: 'Growth',
+      geography: 'Basel, CH',
+      businessModel: 'B2B',
+      contactInfo: 'operations@helix.ch',
+    },
+    clusterData: {
+      problemStatement: 'Biotech manufacturing lines suffer from frequent downtime and calibration defects.',
+      painPoint: 'Manual alignment of bioreactors leads to batch contamination and FDA warnings.',
+      willingnessToPay: '$100k+ annual enterprise licensing',
+      idealCustomerProfile: 'Mid-sized clinical manufacturers & CDMOs',
+      revenueModel: 'Enterprise SaaS + professional service retainer',
+      unitEconomics: '78% margins',
+      keyCosts: 'Machine-learning model training, edge hardware integration, validator travel',
+      breakEvenTimeline: 'Month 36',
+      launchGeography: 'Europe (DACH region)',
+      gtmMotion: 'Direct enterprise sales + industry consortiums',
+      keyMilestones: 'Validation at 2 reference sites · ISO 13485 certification · Close first enterprise contract',
+      fundingAsk: '$3.5M Series A',
+    },
+    selectedTracks: ['governance'],
+    customPicks: ['Risk Register'],
+    engineData: {
+      framework: 'sixsigma',
+      defectRate: 4.2,
+      downtime: 6.1,
+      departments: 4,
+      processMap: 'Line-3 changeover: manual recalibration by ops team, QA sign-off, then production resume. Averaging 4.2% defects post-changeover.'
+    }
+  },
 ];
 
-// Seed report cards for the Kanban board
-const SEED_REPORTS = [
-  { id: 'r1', name: 'EcoFly Medical Drones', vertical: 'startups', tags: ['Logistics', 'Healthcare'], status: 'PUBLISHED',  score: 86 },
-  { id: 'r2', name: 'Apex AI Recruiter',      vertical: 'startups', tags: ['HR Tech', 'SaaS'],       status: 'PROCESSED', score: 72 },
-  { id: 'r3', name: 'GreenPack Biodegradable',vertical: 'startups', tags: ['Eco', 'Retail'],         status: 'PENDING',   score: 64 },
-  { id: 'r4', name: 'Nimbus Cloud Audit',     vertical: 'startups', tags: ['Fintech', 'B2B'],        status: 'RECEIVED',  score: 0 },
-  { id: 'r5', name: 'Verdant Agri-Tech',      vertical: 'msmes',    tags: ['AgriTech'],              status: 'PROCESSED', score: 78 },
-  { id: 'r6', name: 'Helix Pharma Ops',       vertical: 'industries', tags: ['Pharma'],             status: 'PUBLISHED',  score: 91 },
-];
+function computeScore(report) {
+  if (!report) return { score: 0, subScores: { feasibility: 0, marketPotential: 0, pricingPower: 0, gtmViability: 0 }, decision: 0 };
+  
+  let feasibility = 50;
+  let marketPotential = 50;
+  let pricingPower = 50;
+  let gtmViability = 50;
+  
+  if (report.vertical === 'startups') {
+    const data = report.engineData || { tam: 50000000, samPct: 18, channels: { direct: 40, partner: 25, online: 35 }, conversion: 8 };
+    const tam = data.tam || 0;
+    const samPct = data.samPct || 0;
+    const channels = data.channels || { direct: 33, partner: 33, online: 34 };
+    const conversion = data.conversion || 0;
+    
+    const sam = tam * (samPct / 100);
+    const channelWeight = (channels.direct + channels.partner + channels.online) / 100;
+    const som = sam * channelWeight * (conversion / 100);
+    
+    marketPotential = Math.min(100, Math.round(30 + (som > 0 ? Math.log10(som) * 8 : 0)));
+    feasibility = Math.min(100, Math.round(40 + conversion * 5));
+    pricingPower = Math.min(100, Math.round(30 + (channels.direct * 0.8) + (channels.partner * 0.4)));
+    gtmViability = Math.min(100, Math.round(20 + conversion * 6 + (channels.online * 0.6)));
+  } else if (report.vertical === 'msmes') {
+    const data = report.engineData || { team: 7, hoursLost: 14, hourlyRate: 35, tools: 'excel' };
+    const team = data.team || 0;
+    const hoursLost = data.hoursLost || 0;
+    const hourlyRate = data.hourlyRate || 0;
+    
+    const weeklyCost = hoursLost * hourlyRate;
+    const annualCost = weeklyCost * 50;
+    const estSavings = annualCost * 0.6;
+    
+    marketPotential = Math.min(100, Math.round(25 + (estSavings > 0 ? Math.log10(estSavings) * 10 : 0)));
+    feasibility = Math.min(100, Math.max(20, Math.round(100 - team * 6)));
+    pricingPower = Math.min(100, Math.round(30 + hourlyRate * 1.5));
+    gtmViability = Math.min(100, Math.round(40 + hoursLost * 2.5));
+  } else if (report.vertical === 'industries') {
+    const data = report.engineData || { framework: 'sixsigma', defectRate: 4.2, downtime: 6.1, departments: 4 };
+    const framework = data.framework || 'sixsigma';
+    const defectRate = data.defectRate || 0;
+    const downtime = data.downtime || 0;
+    const departments = data.departments || 1;
+    
+    marketPotential = Math.min(100, Math.round(Math.max(10, 95 - defectRate * 9)));
+    feasibility = Math.min(100, Math.round(Math.max(10, 90 - downtime * 5)));
+    pricingPower = framework === 'sixsigma' ? 88 : framework === 'iso' ? 80 : framework === 'tqm' ? 85 : 50;
+    gtmViability = Math.min(100, Math.max(15, 95 - departments * 5));
+  } else if (report.vertical === 'students') {
+    const data = report.engineData || { level: 'Undergrad', scoping: true, litReview: false, analysis: false, hours: 5 };
+    const hours = data.hours || 0;
+    marketPotential = data.level === 'PhD' ? 90 : data.level === 'Grad' ? 75 : 60;
+    feasibility = Math.min(100, Math.round(30 + hours * 8));
+    pricingPower = (data.scoping ? 20 : 0) + (data.litReview ? 30 : 0) + (data.analysis ? 50 : 0);
+    gtmViability = Math.min(100, Math.round(40 + hours * 6));
+  } else if (report.vertical === 'institutions') {
+    const data = report.engineData || { students: 1200, depts: 8, digitalMaturity: 'Medium', trainingHours: 20 };
+    const students = data.students || 0;
+    const depts = data.depts || 1;
+    const digitalMaturity = data.digitalMaturity || 'Medium';
+    const trainingHours = data.trainingHours || 0;
+    
+    marketPotential = Math.min(100, Math.round(30 + Math.min(students, 5000) / 100));
+    feasibility = digitalMaturity === 'High' ? 85 : digitalMaturity === 'Medium' ? 65 : 45;
+    pricingPower = Math.min(100, Math.round(40 + trainingHours * 1.5));
+    gtmViability = Math.min(100, Math.max(10, 95 - depts * 4));
+  }
+  
+  const score = Math.round((marketPotential + feasibility + pricingPower + gtmViability) / 4);
+  const decision = score >= 60 ? 1 : 0;
+  
+  return {
+    score,
+    subScores: { feasibility, marketPotential, pricingPower, gtmViability },
+    decision
+  };
+}
 
 function App() {
   const [page, setPage] = useState('home'); // 'home' | 'login' | 'dashboard'
+  const [reports, setReports] = useState(SEED_REPORTS);
+  const [activeReportId, setActiveReportId] = useState('r1');
   const [activeVertical, setActiveVertical] = useState('startups');
   const [activeCluster, setActiveCluster] = useState('market');
-  const [selectedTracks, setSelectedTracks] = useState(['validation', 'investor']);
-  const [customPicks, setCustomPicks] = useState(['Market Sizing']);
-  const [reports, setReports] = useState(SEED_REPORTS);
   const [isGenModalOpen, setIsGenModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [expandedReport, setExpandedReport] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mainView, setMainView] = useState('pipeline'); // 'pipeline' | 'intake' | 'board'
 
-  const toggleTrack = (id) =>
-    setSelectedTracks((p) => (p.includes(id) ? p.filter((t) => t !== id) : [...p, id]));
-  const toggleCustom = (name) =>
-    setCustomPicks((p) => (p.includes(name) ? p.filter((t) => t !== name) : [...p, name]));
+  const activeReport = reports.find((r) => r.id === activeReportId) || reports[0];
+
+  // Sync activeVertical when activeReport changes
+  const handleSelectReport = (id) => {
+    setActiveReportId(id);
+    const selected = reports.find((r) => r.id === id);
+    if (selected) {
+      setActiveVertical(selected.vertical);
+    }
+  };
+
+  const handleProfileChange = (key, value) => {
+    setReports((prev) =>
+      prev.map((r) => {
+        if (r.id !== activeReportId) return r;
+        const updatedProfile = { ...r.profile, [key]: value };
+        const name = key === 'companyName' ? value : r.name;
+        let tags = r.tags || [];
+        if (key === 'industry') {
+          tags = [value, r.profile?.stage || 'Seed'];
+        } else if (key === 'stage') {
+          tags = [r.profile?.industry || 'Logistics', value];
+        }
+        return { ...r, name, tags, profile: updatedProfile };
+      })
+    );
+  };
+
+  const handleClusterChange = (key, value) => {
+    setReports((prev) =>
+      prev.map((r) => {
+        if (r.id !== activeReportId) return r;
+        return {
+          ...r,
+          clusterData: {
+            ...r.clusterData,
+            [key]: value,
+          },
+        };
+      })
+    );
+  };
+
+  const handleEngineDataChange = (key, value) => {
+    setReports((prev) =>
+      prev.map((r) => {
+        if (r.id !== activeReportId) return r;
+        const nextData = { ...r.engineData, [key]: value };
+        const scoreResults = computeScore({ ...r, engineData: nextData });
+        return {
+          ...r,
+          engineData: nextData,
+          score: scoreResults.score
+        };
+      })
+    );
+  };
+
+  const toggleTrack = (id) => {
+    setReports((prev) =>
+      prev.map((r) => {
+        if (r.id !== activeReportId) return r;
+        const current = r.selectedTracks || [];
+        const next = current.includes(id) ? current.filter((t) => t !== id) : [...current, id];
+        return { ...r, selectedTracks: next };
+      })
+    );
+  };
+
+  const toggleCustom = (name) => {
+    setReports((prev) =>
+      prev.map((r) => {
+        if (r.id !== activeReportId) return r;
+        const current = r.customPicks || [];
+        const next = current.includes(name) ? current.filter((t) => t !== name) : [...current, name];
+        return { ...r, customPicks: next };
+      })
+    );
+  };
 
   const moveReport = (id, dir) => {
     const order = ['RECEIVED', 'PENDING', 'PROCESSED', 'PUBLISHED'];
@@ -94,20 +495,82 @@ function App() {
     );
   };
 
+  const handleScoreOverride = (newScore) => {
+    setReports((prev) =>
+      prev.map((r) => {
+        if (r.id !== activeReportId) return r;
+        return { ...r, score: newScore };
+      })
+    );
+  };
+
   const handleGenerate = () => {
     setIsGenerating(true);
     setTimeout(() => {
-      setReports((prev) => [
-        {
-          id: `r${Date.now()}`,
-          name: 'New Royal Report',
-          vertical: activeVertical,
-          tags: ['Draft'],
-          status: 'RECEIVED',
-          score: 0,
+      const newId = `r${Date.now()}`;
+      const activeVerticalObj = VERTICALS.find((v) => v.id === activeVertical);
+      const newVenture = {
+        id: newId,
+        name: 'New ' + activeVerticalObj.name + ' Venture',
+        vertical: activeVertical,
+        tags: [activeVerticalObj.name, 'Idea'],
+        status: 'RECEIVED',
+        score: 60,
+        profile: {
+          companyName: 'New ' + activeVerticalObj.name + ' Venture',
+          industry: activeVertical === 'startups' ? 'Logistics' : 'Services',
+          stage: 'Idea',
+          geography: 'Mumbai, IN',
+          businessModel: 'B2B',
+          contactInfo: 'founder@newventure.io',
         },
-        ...prev,
-      ]);
+        clusterData: {
+          problemStatement: '',
+          painPoint: '',
+          willingnessToPay: '',
+          idealCustomerProfile: '',
+          revenueModel: '',
+          unitEconomics: '',
+          keyCosts: '',
+          breakEvenTimeline: '',
+          launchGeography: '',
+          gtmMotion: '',
+          keyMilestones: '',
+          fundingAsk: '',
+        },
+        selectedTracks: [],
+        customPicks: [],
+        engineData: activeVertical === 'startups' ? {
+          tam: 10000000,
+          samPct: 15,
+          channels: { direct: 33, partner: 33, online: 34 },
+          conversion: 5,
+        } : activeVertical === 'msmes' ? {
+          team: 5,
+          hoursLost: 10,
+          hourlyRate: 25,
+          tools: 'manual',
+        } : activeVertical === 'industries' ? {
+          framework: 'sixsigma',
+          defectRate: 3.5,
+          downtime: 5.0,
+          departments: 3,
+        } : activeVertical === 'students' ? {
+          level: 'Undergrad',
+          scoping: true,
+          litReview: false,
+          analysis: false,
+          hours: 5,
+        } : {
+          students: 1000,
+          depts: 5,
+          digitalMaturity: 'Medium',
+          trainingHours: 15,
+        }
+      };
+
+      setReports((prev) => [newVenture, ...prev]);
+      setActiveReportId(newId);
       setIsGenerating(false);
       setIsGenModalOpen(false);
     }, 1900);
@@ -115,7 +578,10 @@ function App() {
 
   const activeVerticalObj = VERTICALS.find((v) => v.id === activeVertical);
 
-  // ---- Page-level routing (no router lib needed) ----
+  // Compute live scores dynamically
+  const { score: computedScore, subScores: computedSubScores, decision: computedDecision } = computeScore(activeReport);
+
+  // ---- Page-level routing ----
   if (page === 'home') {
     return (
       <AnimatePresence mode="wait">
@@ -153,7 +619,14 @@ function App() {
       <Sidebar
         verticals={VERTICALS}
         activeVertical={activeVertical}
-        setActiveVertical={setActiveVertical}
+        setActiveVertical={(v) => {
+          setActiveVertical(v);
+          // Find first report with this vertical and select it, or create a mock
+          const matched = reports.find(r => r.vertical === v);
+          if (matched) {
+            setActiveReportId(matched.id);
+          }
+        }}
         open={sidebarOpen}
         setOpen={setSidebarOpen}
         goHome={() => setPage('home')}
@@ -161,44 +634,68 @@ function App() {
 
       {/* ============ MAIN ============ */}
       <main className="flex-1 overflow-x-hidden">
-        <Topbar activeVertical={activeVerticalObj} />
+        <Topbar
+          activeVertical={activeVerticalObj}
+          reports={reports}
+          activeReportId={activeReportId}
+          setActiveReportId={handleSelectReport}
+          onAddReport={() => setIsGenModalOpen(true)}
+        />
 
         <div className="mx-auto max-w-7xl space-y-8 px-5 py-8 md:px-8">
           {/* VERTICAL HERO */}
-          <VerticalHero vertical={activeVerticalObj} />
+          <VerticalHero vertical={activeVerticalObj} onNewEngagement={() => setIsGenModalOpen(true)} />
 
           {/* MAIN-VIEW TABS */}
           <MainViewTabs mainView={mainView} setMainView={setMainView} />
 
           {/* ---------- PIPELINE VIEW (processing architecture) ---------- */}
-          {mainView === 'pipeline' && <VentureProcessor />}
+          {mainView === 'pipeline' && (
+            <VentureProcessor
+              activeReport={activeReport}
+              onStatusChange={(status) => {
+                setReports(prev => prev.map(r => r.id === activeReport.id ? { ...r, status } : r));
+              }}
+              onScoreChange={handleScoreOverride}
+              computedScore={computedScore}
+              computedSubScores={computedSubScores}
+              computedDecision={computedDecision}
+            />
+          )}
 
-          {/* ---------- INTAKE VIEW (vertical-specific) ---------- */}
+          {/* ---------- INTAKE VIEW (three-layer) ---------- */}
           {mainView === 'intake' && (
             <>
+              <ThreeLayerEngine
+                activeReport={activeReport}
+                handleProfileChange={handleProfileChange}
+                handleClusterChange={handleClusterChange}
+                activeCluster={activeCluster}
+                setActiveCluster={setActiveCluster}
+                activeVertical={activeVertical}
+                toggleTrack={toggleTrack}
+                toggleCustom={toggleCustom}
+                onGenerate={() => setIsGenModalOpen(true)}
+              />
+              <div className="mt-10 flex items-center gap-4">
+                <div className="h-px flex-1 bg-amber-500/15" />
+                <span className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-amber-300/50">Function Engine</span>
+                <div className="h-px flex-1 bg-amber-500/15" />
+              </div>
               {activeVertical === 'startups' && (
-                <>
-                  <ThreeLayerEngine
-                    activeCluster={activeCluster}
-                    setActiveCluster={setActiveCluster}
-                    selectedTracks={selectedTracks}
-                    toggleTrack={toggleTrack}
-                    customPicks={customPicks}
-                    toggleCustom={toggleCustom}
-                    onGenerate={() => setIsGenModalOpen(true)}
-                  />
-                  <div className="mt-10 flex items-center gap-4">
-                    <div className="h-px flex-1 bg-amber-500/15" />
-                    <span className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-amber-300/50">Function Engine</span>
-                    <div className="h-px flex-1 bg-amber-500/15" />
-                  </div>
-                  <StartupMarketEngine />
-                </>
+                <StartupMarketEngine activeReport={activeReport} onEngineDataChange={handleEngineDataChange} />
               )}
-              {activeVertical === 'msmes' && <MsmeOptimizationEngine />}
-              {activeVertical === 'industries' && <IndustryAnalysisEngine />}
-              {(activeVertical === 'students' || activeVertical === 'institutions') && (
-                <GenericVerticalPanel vertical={activeVerticalObj} />
+              {activeVertical === 'msmes' && (
+                <MsmeOptimizationEngine activeReport={activeReport} onEngineDataChange={handleEngineDataChange} />
+              )}
+              {activeVertical === 'industries' && (
+                <IndustryAnalysisEngine activeReport={activeReport} onEngineDataChange={handleEngineDataChange} />
+              )}
+              {activeVertical === 'students' && (
+                <StudentMentorshipEngine activeReport={activeReport} onEngineDataChange={handleEngineDataChange} />
+              )}
+              {activeVertical === 'institutions' && (
+                <InstitutionalMaturityEngine activeReport={activeReport} onEngineDataChange={handleEngineDataChange} />
               )}
             </>
           )}
@@ -212,6 +709,8 @@ function App() {
               expandedReport={expandedReport}
               setExpandedReport={setExpandedReport}
               onGenerate={() => setIsGenModalOpen(true)}
+              activeReportId={activeReportId}
+              onSelectReport={handleSelectReport}
             />
           )}
         </div>
@@ -233,7 +732,7 @@ function App() {
 }
 
 /* ============================================================
-   SIDEBAR — royal left navigation with 5 verticals
+   SIDEBAR
    ============================================================ */
 function Sidebar({ verticals, activeVertical, setActiveVertical, open, setOpen, goHome }) {
   return (
@@ -242,7 +741,6 @@ function Sidebar({ verticals, activeVertical, setActiveVertical, open, setOpen, 
         open ? 'w-72' : 'w-20'
       }`}
     >
-      {/* Brand — click to return home */}
       <button
         onClick={goHome}
         className="group flex w-full items-center gap-3 px-5 py-6 text-left transition hover:bg-white/[0.03]"
@@ -269,7 +767,6 @@ function Sidebar({ verticals, activeVertical, setActiveVertical, open, setOpen, 
         <ChevronRight size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Navigation */}
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {open && (
           <p className="px-3 pb-2 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-stone-600">
@@ -307,7 +804,6 @@ function Sidebar({ verticals, activeVertical, setActiveVertical, open, setOpen, 
         })}
       </nav>
 
-      {/* Footer */}
       {open && (
         <div className="space-y-1 px-3 pb-5">
           <p className="px-3 pb-2 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-stone-600">
@@ -348,9 +844,12 @@ function Sidebar({ verticals, activeVertical, setActiveVertical, open, setOpen, 
 }
 
 /* ============================================================
-   TOPBAR
+   TOPBAR — Venture Selector included
    ============================================================ */
-function Topbar({ activeVertical }) {
+function Topbar({ activeVertical, reports, activeReportId, setActiveReportId, onAddReport }) {
+  const [open, setOpen] = useState(false);
+  const activeReport = reports.find((r) => r.id === activeReportId) || reports[0];
+
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between border-b border-amber-500/10 bg-black/30 px-5 py-4 backdrop-blur-xl md:px-8">
       <div className="flex items-center gap-2 text-sm text-stone-200/50">
@@ -359,7 +858,68 @@ function Topbar({ activeVertical }) {
         <ChevronRight size={14} />
         <span className="font-medium text-stone-200">{activeVertical?.name}</span>
       </div>
+
       <div className="flex items-center gap-3">
+        {/* Venture Dropdown Selector */}
+        <div className="relative">
+          <button
+            onClick={() => setOpen(!open)}
+            className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-black/45 px-3 py-2 text-xs font-semibold text-stone-200 transition hover:border-amber-400/50"
+          >
+            <Crown size={12} className="text-amber-400" />
+            <span>Venture: <strong className="text-amber-300">{activeReport?.name}</strong></span>
+            <ChevronDown size={12} className={`text-stone-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+          </button>
+          
+          <AnimatePresence>
+            {open && (
+              <>
+                <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  className="absolute right-0 mt-2 z-30 w-64 origin-top-right rounded-xl border border-amber-500/20 bg-stone-900/95 p-2 shadow-2xl backdrop-blur-xl"
+                >
+                  <p className="px-2 py-1 text-[0.62rem] font-bold uppercase tracking-wider text-stone-500">Select Active Venture</p>
+                  <div className="max-h-60 overflow-y-auto mt-1 space-y-1">
+                    {reports.map((r) => (
+                      <button
+                        key={r.id}
+                        onClick={() => {
+                          setActiveReportId(r.id);
+                          setOpen(false);
+                        }}
+                        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition ${
+                          r.id === activeReportId
+                            ? 'bg-amber-500/10 text-amber-300'
+                            : 'text-stone-300 hover:bg-white/5'
+                        }`}
+                      >
+                        <span className="truncate font-medium">{r.name}</span>
+                        <span className="text-[0.55rem] font-bold uppercase tracking-wider opacity-60">
+                          {r.vertical}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="border-t border-amber-500/15 mt-2 pt-2">
+                    <button
+                      onClick={() => {
+                        onAddReport();
+                        setOpen(false);
+                      }}
+                      className="flex w-full items-center justify-center gap-1 rounded-lg bg-amber-500/15 py-1.5 text-xs font-bold text-amber-300 transition hover:bg-amber-500/25"
+                    >
+                      <Plus size={12} /> New Venture
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
         <div className="hidden items-center gap-2 rounded-xl border border-amber-500/20 bg-black/40 px-3 py-2 md:flex">
           <Search size={15} className="text-stone-600" />
           <input
@@ -376,7 +936,7 @@ function Topbar({ activeVertical }) {
 }
 
 /* ============================================================
-   MAIN-VIEW TABS — switch between Pipeline / Intake / Board
+   MAIN-VIEW TABS
    ============================================================ */
 function MainViewTabs({ mainView, setMainView }) {
   const tabs = [
@@ -411,12 +971,11 @@ function MainViewTabs({ mainView, setMainView }) {
   );
 }
 
-
-function VerticalHero({ vertical }) {
+function VerticalHero({ vertical, onNewEngagement }) {
   const Icon = vertical?.icon;
   return (
     <motion.div
-      key={vertical.id}
+      key={vertical?.id}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -439,7 +998,7 @@ function VerticalHero({ vertical }) {
             <GhostButton>
               <FileText size={15} /> Brief
             </GhostButton>
-            <RoyalButton>
+            <RoyalButton onClick={onNewEngagement}>
               <Sparkles size={15} /> New Engagement
             </RoyalButton>
           </div>
@@ -450,19 +1009,25 @@ function VerticalHero({ vertical }) {
 }
 
 /* ============================================================
-   THREE-LAYER INTAKE ENGINE (Startup vertical)
+   THREE-LAYER INTAKE ENGINE
    ============================================================ */
 function ThreeLayerEngine({
-  activeCluster, setActiveCluster,
-  selectedTracks, toggleTrack,
-  customPicks, toggleCustom,
-  onGenerate,
+  activeReport, handleProfileChange, handleClusterChange,
+  activeCluster, setActiveCluster, activeVertical,
+  toggleTrack, toggleCustom, onGenerate
 }) {
+  const profile = activeReport?.profile || {};
+  const clusterData = activeReport?.clusterData || {};
+  const selectedTracks = activeReport?.selectedTracks || [];
+  const customPicks = activeReport?.customPicks || [];
+
+  const currentFlagshipTracks = TRACKS_BY_VERTICAL[activeVertical] || [];
+
   return (
     <section className="space-y-7">
       <SectionTitle
         icon={Layers}
-        kicker="Startup Vertical"
+        kicker={`${activeVertical?.toUpperCase()} Vertical`}
         title="Three-Layer Dynamic Intake Engine"
         subtitle="A layered architecture: capture once, cluster by theme, then select flagship tracks."
       />
@@ -473,35 +1038,47 @@ function ThreeLayerEngine({
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
           <GlassPanel className="p-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Field label="Company Name">
-              <Input defaultValue="EcoFly Robotics" />
-            </Field>
-            <Field label="Industry">
-              <Select defaultValue="Logistics">
-                <option>Logistics</option><option>Healthcare</option><option>Fintech</option>
-                <option>SaaS</option><option>AgriTech</option>
-              </Select>
-            </Field>
-            <Field label="Stage">
-              <Select defaultValue="Seed">
-                <option>Idea</option><option>Pre-Seed</option><option>Seed</option>
-                <option>Series A</option><option>Growth</option>
-              </Select>
-            </Field>
-            <Field label="Geography">
-              <Input defaultValue="Bengaluru, IN" />
-            </Field>
-            <Field label="Business Model">
-              <Select defaultValue="B2B">
-                <option>B2B</option><option>B2C</option><option>B2B2C</option><option>Marketplace</option>
-              </Select>
-            </Field>
-            <Field label="Contact Info">
-              <Input defaultValue="founder@ecofly.io" />
-            </Field>
-          </div>
-        </GlassPanel>
-      </motion.div>
+              <Field label="Company / Venture Name">
+                <Input value={profile.companyName ?? ''} onChange={(e) => handleProfileChange('companyName', e.target.value)} />
+              </Field>
+              <Field label="Industry / Sector">
+                <Select value={profile.industry ?? 'Logistics'} onChange={(e) => handleProfileChange('industry', e.target.value)}>
+                  <option value="Logistics">Logistics</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Fintech">Fintech</option>
+                  <option value="SaaS">SaaS</option>
+                  <option value="AgriTech">AgriTech</option>
+                  <option value="Eco">Eco / GreenTech</option>
+                  <option value="Education">Education</option>
+                  <option value="Services">Services</option>
+                </Select>
+              </Field>
+              <Field label="Current Stage">
+                <Select value={profile.stage ?? 'Seed'} onChange={(e) => handleProfileChange('stage', e.target.value)}>
+                  <option value="Idea">Idea / Concept</option>
+                  <option value="Pre-Seed">Pre-Seed</option>
+                  <option value="Seed">Seed</option>
+                  <option value="Series A">Series A</option>
+                  <option value="Growth">Growth Scale</option>
+                </Select>
+              </Field>
+              <Field label="Operating Geography">
+                <Input value={profile.geography ?? ''} onChange={(e) => handleProfileChange('geography', e.target.value)} />
+              </Field>
+              <Field label="Business Model">
+                <Select value={profile.businessModel ?? 'B2B'} onChange={(e) => handleProfileChange('businessModel', e.target.value)}>
+                  <option value="B2B">B2B SaaS / Enterprise</option>
+                  <option value="B2C">B2C Retail / App</option>
+                  <option value="B2B2C">B2B2C Hybrid</option>
+                  <option value="Marketplace">Marketplace Platform</option>
+                </Select>
+              </Field>
+              <Field label="Primary Contact Info">
+                <Input value={profile.contactInfo ?? ''} onChange={(e) => handleProfileChange('contactInfo', e.target.value)} />
+              </Field>
+            </div>
+          </GlassPanel>
+        </motion.div>
       </div>
 
       {/* LAYER 2 — CLUSTER FORMS */}
@@ -509,156 +1086,172 @@ function ThreeLayerEngine({
         <LayerBadge n={2} title="Cluster Forms" hint="Report-specific inputs grouped by theme" />
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.05 }}>
           <GlassPanel className="overflow-hidden p-0">
-          {/* Tabs */}
-          <div className="flex flex-wrap gap-1 border-b border-amber-500/15 bg-black/30 p-2">
-            {CLUSTER_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveCluster(tab.id)}
-                className={`relative rounded-lg px-4 py-2 text-sm font-medium transition ${
-                  activeCluster === tab.id ? 'text-amber-900' : 'text-stone-400 hover:text-stone-100'
-                }`}
-              >
-                {activeCluster === tab.id && (
-                  <motion.span
-                    layoutId="cluster-tab"
-                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 shadow-[0_0_18px_rgba(245,158,11,0.4)]"
-                  />
-                )}
-                <span className="relative flex items-center gap-2">
-                  <span className={`text-[0.62rem] font-bold uppercase tracking-wider ${activeCluster === tab.id ? 'text-amber-900/70' : 'text-amber-300/50'}`}>
-                    {tab.cluster}
+            {/* Tabs */}
+            <div className="flex flex-wrap gap-1 border-b border-amber-500/15 bg-black/30 p-2">
+              {CLUSTER_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveCluster(tab.id)}
+                  className={`relative rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    activeCluster === tab.id ? 'text-amber-900' : 'text-stone-400 hover:text-stone-100'
+                  }`}
+                >
+                  {activeCluster === tab.id && (
+                    <motion.span
+                      layoutId="cluster-tab"
+                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 shadow-[0_0_18px_rgba(245,158,11,0.4)]"
+                    />
+                  )}
+                  <span className="relative flex items-center gap-2">
+                    <span className={`text-[0.62rem] font-bold uppercase tracking-wider ${activeCluster === tab.id ? 'text-amber-900/70' : 'text-amber-300/50'}`}>
+                      {tab.cluster}
+                    </span>
+                    {tab.name}
                   </span>
-                  {tab.name}
-                </span>
-              </button>
-            ))}
-          </div>
+                </button>
+              ))}
+            </div>
 
-          {/* Tab body */}
-          <div className="p-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeCluster}
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.25 }}
-                className="grid grid-cols-1 gap-4 md:grid-cols-2"
-              >
-                {activeCluster === 'market' && (
-                  <>
-                    <Field label="Problem statement">
-                      <Textarea defaultValue="Rural clinics wait hours for emergency blood & vaccine deliveries." className="min-h-[90px]" />
-                    </Field>
-                    <Field label="Specific pain point">
-                      <Textarea defaultValue="Last-mile cold-chain breaks spoil 30% of medical cargo." className="min-h-[90px]" />
-                    </Field>
-                    <Field label="Willingness-to-pay signals">
-                      <Input defaultValue="$15–25 per priority delivery" />
-                    </Field>
-                    <Field label="Ideal customer profile">
-                      <Input defaultValue="Regional health networks, 50+ clinics" />
-                    </Field>
-                  </>
-                )}
-                {activeCluster === 'viability' && (
-                  <>
-                    <Field label="Revenue model"><Input defaultValue="Per-delivery + monthly retainer" /></Field>
-                    <Field label="Unit economics (gross margin)"><Input defaultValue="62% at scale" /></Field>
-                    <Field label="Key costs"><Input defaultValue="Fleet, batteries, BVLOS compliance" /></Field>
-                    <Field label="Break-even timeline"><Input defaultValue="Month 18" /></Field>
-                  </>
-                )}
-                {activeCluster === 'launch' && (
-                  <>
-                    <Field label="Launch geography"><Input defaultValue="Karnataka pilot zone" /></Field>
-                    <Field label="Go-to-market motion"><Input defaultValue="Govt partnerships + NGO tenders" /></Field>
-                    <Field label="Key milestones (12mo)"><Textarea defaultValue="3 hubs live · 10 clinics onboarded · BVLOS certified" className="min-h-[70px]" /></Field>
-                    <Field label="Funding ask"><Input defaultValue="$1.2M seed" /></Field>
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </GlassPanel>
-      </motion.div>
+            {/* Tab body */}
+            <div className="p-6">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeCluster}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.25 }}
+                  className="grid grid-cols-1 gap-4 md:grid-cols-2"
+                >
+                  {activeCluster === 'market' && (
+                    <>
+                      <Field label="Problem statement">
+                        <Textarea value={clusterData.problemStatement ?? ''} onChange={(e) => handleClusterChange('problemStatement', e.target.value)} className="min-h-[90px]" />
+                      </Field>
+                      <Field label="Specific pain point">
+                        <Textarea value={clusterData.painPoint ?? ''} onChange={(e) => handleClusterChange('painPoint', e.target.value)} className="min-h-[90px]" />
+                      </Field>
+                      <Field label="Willingness-to-pay signals">
+                        <Input value={clusterData.willingnessToPay ?? ''} onChange={(e) => handleClusterChange('willingnessToPay', e.target.value)} />
+                      </Field>
+                      <Field label="Ideal customer profile">
+                        <Input value={clusterData.idealCustomerProfile ?? ''} onChange={(e) => handleClusterChange('idealCustomerProfile', e.target.value)} />
+                      </Field>
+                    </>
+                  )}
+                  {activeCluster === 'viability' && (
+                    <>
+                      <Field label="Revenue model">
+                        <Input value={clusterData.revenueModel ?? ''} onChange={(e) => handleClusterChange('revenueModel', e.target.value)} />
+                      </Field>
+                      <Field label="Unit economics (gross margin)">
+                        <Input value={clusterData.unitEconomics ?? ''} onChange={(e) => handleClusterChange('unitEconomics', e.target.value)} />
+                      </Field>
+                      <Field label="Key costs">
+                        <Input value={clusterData.keyCosts ?? ''} onChange={(e) => handleClusterChange('keyCosts', e.target.value)} />
+                      </Field>
+                      <Field label="Break-even timeline">
+                        <Input value={clusterData.breakEvenTimeline ?? ''} onChange={(e) => handleClusterChange('breakEvenTimeline', e.target.value)} />
+                      </Field>
+                    </>
+                  )}
+                  {activeCluster === 'launch' && (
+                    <>
+                      <Field label="Launch geography">
+                        <Input value={clusterData.launchGeography ?? ''} onChange={(e) => handleClusterChange('launchGeography', e.target.value)} />
+                      </Field>
+                      <Field label="Go-to-market motion">
+                        <Input value={clusterData.gtmMotion ?? ''} onChange={(e) => handleClusterChange('gtmMotion', e.target.value)} />
+                      </Field>
+                      <Field label="Key milestones (12mo)">
+                        <Textarea value={clusterData.keyMilestones ?? ''} onChange={(e) => handleClusterChange('keyMilestones', e.target.value)} className="min-h-[70px]" />
+                      </Field>
+                      <Field label="Funding ask">
+                        <Input value={clusterData.fundingAsk ?? ''} onChange={(e) => handleClusterChange('fundingAsk', e.target.value)} />
+                      </Field>
+                    </>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </GlassPanel>
+        </motion.div>
       </div>
 
       {/* LAYER 3 — REPORT & TRACK CATALOGUE */}
       <div className="space-y-3">
         <LayerBadge n={3} title="Report & Track Catalogue" hint="Flagship tracks + build-your-own" />
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }} className="space-y-5">
-        {/* Flagship tracks */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {FLAGSHIP_TRACKS.map((track) => {
-            const Icon = track.icon;
-            const selected = selectedTracks.includes(track.id);
-            return (
-              <button
-                key={track.id}
-                onClick={() => toggleTrack(track.id)}
-                className={`group relative overflow-hidden rounded-2xl border p-5 text-left transition ${
-                  selected
-                    ? 'border-amber-400/60 bg-gradient-to-br from-amber-500/15 to-amber-700/5 shadow-[0_0_28px_rgba(245,158,11,0.18)]'
-                    : 'border-amber-500/20 bg-black/40 hover:border-amber-400/40'
-                }`}
-              >
-                <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-amber-500/10 blur-2xl transition group-hover:bg-amber-500/20" />
-                <div className="relative flex items-start justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-400/30 bg-amber-500/10">
-                    <Icon className="h-5 w-5 text-amber-400" />
-                  </div>
-                  {selected && <CheckCircle2 className="h-5 w-5 text-amber-400" />}
-                </div>
-                <h4 className="relative mt-4 font-serif text-lg font-bold text-stone-100">{track.name}</h4>
-                <p className="relative mt-1 text-xs text-stone-400">{track.desc}</p>
-                <span className="relative mt-3 inline-block text-[0.6rem] font-bold uppercase tracking-[0.18em] text-amber-300/70">
-                  Flagship · Premium
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Build your own picker */}
-        <GlassPanel className="p-6">
-          <div className="flex items-center gap-2">
-            <Zap size={16} className="text-amber-400" />
-            <h4 className="font-serif text-lg font-bold text-stone-100">Build Your Own Track</h4>
-          </div>
-          <p className="mt-1 text-sm text-stone-400">Compose a custom report from modular components.</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {BUILD_YOUR_OWN.map((mod) => {
-              const on = customPicks.includes(mod);
+          {/* Flagship tracks */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {currentFlagshipTracks.map((track) => {
+              const Icon = track.icon;
+              const selected = selectedTracks.includes(track.id);
               return (
                 <button
-                  key={mod}
-                  onClick={() => toggleCustom(mod)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
-                    on
-                      ? 'border-amber-400/60 bg-amber-500/20 text-stone-200'
-                      : 'border-amber-500/20 bg-black/30 text-stone-400 hover:border-amber-400/40'
+                  key={track.id}
+                  onClick={() => toggleTrack(track.id)}
+                  className={`group relative overflow-hidden rounded-2xl border p-5 text-left transition ${
+                    selected
+                      ? 'border-amber-400/60 bg-gradient-to-br from-amber-500/15 to-amber-700/5 shadow-[0_0_28px_rgba(245,158,11,0.18)]'
+                      : 'border-amber-500/20 bg-black/40 hover:border-amber-400/40'
                   }`}
                 >
-                  {on && <CheckCircle2 size={12} className="text-amber-400" />}
-                  {mod}
+                  <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-amber-500/10 blur-2xl transition group-hover:bg-amber-500/20" />
+                  <div className="relative flex items-start justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-400/30 bg-amber-500/10">
+                      <Icon className="h-5 w-5 text-amber-400" />
+                    </div>
+                    {selected && <CheckCircle2 className="h-5 w-5 text-amber-400" />}
+                  </div>
+                  <h4 className="relative mt-4 font-serif text-lg font-bold text-stone-100">{track.name}</h4>
+                  <p className="relative mt-1 text-xs text-stone-400">{track.desc}</p>
+                  <span className="relative mt-3 inline-block text-[0.6rem] font-bold uppercase tracking-[0.18em] text-amber-300/70">
+                    Flagship · Premium
+                  </span>
                 </button>
               );
             })}
           </div>
 
-          {/* Smart Suggestion engine — recommends add-ons from current selection */}
-          <SmartSuggestions
-            picks={customPicks}
-            tracks={selectedTracks}
-            onAdd={toggleCustom}
-          />
-        </GlassPanel>
-      </motion.div>
+          {/* Build your own picker */}
+          <GlassPanel className="p-6">
+            <div className="flex items-center gap-2">
+              <Zap size={16} className="text-amber-400" />
+              <h4 className="font-serif text-lg font-bold text-stone-100">Build Your Own Track</h4>
+            </div>
+            <p className="mt-1 text-sm text-stone-400">Compose a custom report from modular components.</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {BUILD_YOUR_OWN.map((mod) => {
+                const on = customPicks.includes(mod);
+                return (
+                  <button
+                    key={mod}
+                    onClick={() => toggleCustom(mod)}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
+                      on
+                        ? 'border-amber-400/60 bg-amber-500/20 text-stone-200'
+                        : 'border-amber-500/20 bg-black/30 text-stone-400 hover:border-amber-400/40'
+                    }`}
+                  >
+                    {on && <CheckCircle2 size={12} className="text-amber-400" />}
+                    {mod}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Smart Suggestion engine */}
+            <SmartSuggestions
+              picks={customPicks}
+              tracks={selectedTracks}
+              onAdd={toggleCustom}
+            />
+          </GlassPanel>
+        </motion.div>
       </div>
 
-      {/* Generate Report button — spans bottom of data entry */}
+      {/* Generate Report button */}
       <div className="sticky bottom-4 z-10">
         <button
           onClick={onGenerate}
@@ -675,55 +1268,12 @@ function ThreeLayerEngine({
 }
 
 /* ============================================================
-   GENERIC PANEL — Students / Institutions
+   KANBAN BOARD
    ============================================================ */
-function GenericVerticalPanel({ vertical }) {
-  const Icon = vertical?.icon;
-  const cards =
-    vertical?.id === 'students'
-      ? [
-          { icon: GraduationCap, title: 'Academic Counseling', desc: '1:1 mentorship plans, course trajectories & research direction.' },
-          { icon: ClipboardList, title: 'Research Mentorship', desc: 'Pair scholars with domain guides; track thesis milestones.' },
-          { icon: Target, title: 'Project Management', desc: 'Scoped deliverables, deadlines & advisor reviews.' },
-        ]
-      : [
-          { icon: FileText, title: 'Curriculum Development', desc: 'Design outcomes-aligned curricula across departments.' },
-          { icon: Users, title: 'Faculty Training', desc: 'Upskill faculty with tracked competency modules.' },
-          { icon: Building2, title: 'Organizational Diagnosis', desc: 'Audit institutional health across stakeholders.' },
-        ];
-  return (
-    <section className="space-y-6">
-      <SectionTitle
-        icon={Icon}
-        kicker="Engagement Modules"
-        title={`${vertical?.name} Modules`}
-        subtitle="Royal-grade engagement workflows tailored to this vertical."
-      />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {cards.map((c) => {
-          const CIcon = c.icon;
-          return (
-            <GlassPanel key={c.title} className="group p-5 transition hover:border-amber-400/40">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-amber-400/30 bg-amber-500/10">
-                <CIcon className="h-5 w-5 text-amber-400" />
-              </div>
-              <h4 className="mt-4 font-serif text-lg font-bold text-stone-100">{c.title}</h4>
-              <p className="mt-1 text-sm text-stone-400">{c.desc}</p>
-              <button className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-amber-300 transition hover:gap-2">
-                Explore <ChevronRight size={13} />
-              </button>
-            </GlassPanel>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
-   KANBAN BOARD — report lifecycle tracking
-   ============================================================ */
-function KanbanBoard({ reports, columns, moveReport, expandedReport, setExpandedReport, onGenerate }) {
+function KanbanBoard({
+  reports, columns, moveReport, expandedReport, setExpandedReport,
+  onGenerate, activeReportId, onSelectReport
+}) {
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -770,20 +1320,32 @@ function KanbanBoard({ reports, columns, moveReport, expandedReport, setExpanded
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.25 }}
-                      className="group rounded-xl border border-amber-500/20 bg-gradient-to-br from-white/[0.04] to-transparent p-3.5 transition hover:border-amber-400/45 hover:shadow-[0_0_20px_rgba(245,158,11,0.12)]"
+                      className={`group cursor-pointer rounded-xl border p-3.5 transition hover:shadow-[0_0_20px_rgba(245,158,11,0.12)] ${
+                        r.id === activeReportId
+                          ? 'border-amber-400 bg-gradient-to-br from-amber-500/15 to-transparent'
+                          : 'border-amber-500/20 bg-gradient-to-br from-white/[0.04] to-transparent hover:border-amber-400/45'
+                      }`}
+                      onClick={() => onSelectReport(r.id)}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <h5 className="text-sm font-semibold leading-snug text-stone-100">{r.name}</h5>
+                        <div className="flex flex-col">
+                          {r.id === activeReportId && (
+                            <span className="mb-1 self-start rounded bg-amber-500/20 px-1.5 py-0.5 text-[0.5rem] font-bold uppercase tracking-wider text-amber-300">
+                              Active Venture
+                            </span>
+                          )}
+                          <h5 className="text-sm font-semibold leading-snug text-stone-100">{r.name}</h5>
+                        </div>
                         <StatusBadge status={r.status} />
                       </div>
                       <div className="mt-2 flex flex-wrap gap-1.5">
-                        {r.tags.map((t) => (
+                        {r.tags?.map((t) => (
                           <span key={t} className="rounded-md bg-white/5 px-1.5 py-0.5 text-[0.62rem] text-stone-400">{t}</span>
                         ))}
                       </div>
 
-                      {/* Score (only when published) */}
-                      {r.status === 'PUBLISHED' && r.score > 0 && (
+                      {/* Score */}
+                      {r.score > 0 && (
                         <div className="mt-3 flex items-center gap-2">
                           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-black/40">
                             <div
@@ -792,13 +1354,18 @@ function KanbanBoard({ reports, columns, moveReport, expandedReport, setExpanded
                             />
                           </div>
                           <span className="text-xs font-bold text-amber-300">{r.score}</span>
-                          <button
-                            onClick={() => setExpandedReport(expandedReport === r.id ? null : r.id)}
-                            className="text-amber-300/60 transition hover:text-stone-300"
-                            aria-label="Expand"
-                          >
-                            <ChevronDown size={14} className={`transition ${expandedReport === r.id ? 'rotate-180' : ''}`} />
-                          </button>
+                          {r.status === 'PUBLISHED' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedReport(expandedReport === r.id ? null : r.id);
+                              }}
+                              className="text-amber-300/60 transition hover:text-stone-300"
+                              aria-label="Expand"
+                            >
+                              <ChevronDown size={14} className={`transition ${expandedReport === r.id ? 'rotate-180' : ''}`} />
+                            </button>
+                          )}
                         </div>
                       )}
 
@@ -809,12 +1376,13 @@ function KanbanBoard({ reports, columns, moveReport, expandedReport, setExpanded
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <div className="mt-3 space-y-2 rounded-lg border border-amber-500/15 bg-black/30 p-3">
                               {[
-                                { k: 'Market Demand', v: 88 },
-                                { k: 'Tech Feasibility', v: 72 },
-                                { k: 'Unit Economics', v: 90 },
+                                { k: 'Market Potential', v: Math.round(r.score * 1.02) > 100 ? 100 : Math.round(r.score * 1.02) },
+                                { k: 'Feasibility', v: Math.round(r.score * 0.95) },
+                                { k: 'Pricing Power', v: Math.round(r.score * 0.88) },
                               ].map((m) => (
                                 <div key={m.k} className="flex items-center gap-2 text-[0.68rem]">
                                   <span className="w-28 text-stone-400">{m.k}</span>
@@ -835,7 +1403,10 @@ function KanbanBoard({ reports, columns, moveReport, expandedReport, setExpanded
                       {/* Mover controls */}
                       <div className="mt-3 flex items-center justify-between opacity-0 transition group-hover:opacity-100">
                         <button
-                          onClick={() => moveReport(r.id, -1)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveReport(r.id, -1);
+                          }}
                           disabled={r.status === 'RECEIVED'}
                           className="text-[0.62rem] text-stone-500 transition hover:text-stone-300 disabled:opacity-30"
                         >
@@ -843,7 +1414,10 @@ function KanbanBoard({ reports, columns, moveReport, expandedReport, setExpanded
                         </button>
                         <span className="text-[0.6rem] uppercase tracking-wider text-amber-300/40">{r.vertical}</span>
                         <button
-                          onClick={() => moveReport(r.id, 1)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveReport(r.id, 1);
+                          }}
                           disabled={r.status === 'PUBLISHED'}
                           className="text-[0.62rem] text-stone-500 transition hover:text-stone-300 disabled:opacity-30"
                         >
@@ -973,13 +1547,9 @@ function LayerBadge({ n, title, hint }) {
 }
 
 /* ============================================================
-   SMART SUGGESTION ENGINE (Zai upsell module)
-   Analyzes current selection + filled clusters, recommends
-   high-value add-ons achievable with minimal extra inputs.
+   SMART SUGGESTION ENGINE
    ============================================================ */
 function SmartSuggestions({ picks, tracks, onAdd }) {
-  // Recommendation rules: each keyed on what the user already has,
-  // suggesting a module + the small incremental cost to unlock it.
   const RULES = [
     {
       when: ['Market Sizing'],
