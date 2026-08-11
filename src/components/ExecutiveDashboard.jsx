@@ -5,6 +5,7 @@ import ReportOverview from "./ReportOverview.jsx";
 import DocumentUpload from "./DocumentUpload.jsx";
 import BrandEquityForm from "./BrandEquityForm.jsx";
 import QueriesPanel from "./QueriesPanel.jsx";
+import InvoicesPanel from "./InvoicesPanel.jsx";
 import StrengthBadge from "./StrengthBadge.jsx";
 import { StartupMarketEngine, MsmeOptimizationEngine, IndustryAnalysisEngine } from "./VerticalEngines.jsx";
 import IntakeEngine from "./IntakeEngine.jsx";
@@ -246,6 +247,7 @@ const NAV_SECTIONS = [
   { id: "queries",   label: "Queries",         short: "Queries",   icon: MessageSquare, hint: "Ask a question and read the response" },
   { id: "modules",   label: "Module Scores",   short: "Modules",   icon: Layers,        hint: "Score for each intelligence module" },
   { id: "engines",   label: "Vertical Engines", short: "Engines",  icon: Cpu,           hint: "Quick TAM/SAM/SOM calculators" },
+  { id: "invoices",  label: "Payment Receipts", short: "Receipts", icon: DollarSign,    hint: "Auto-sent receipts for reports you've paid for" },
 ];
 
 const getStatusBadge = (report) => {
@@ -1140,6 +1142,13 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
               clientName={emailName}
               reportId={projectsList.find((p) => p.fromApi)?.id}
             />
+          </section>
+        )}
+
+        {/* ---------------- INVOICES — payment receipts for this user ---------------- */}
+        {navbarSection === "invoices" && (
+          <section className="pt-2">
+            <InvoicesPanel role="client" clientEmail={userEmail} />
           </section>
         )}
 

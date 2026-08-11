@@ -8,6 +8,7 @@ import {
 import { downloadReportDoc } from "../reportDoc.js";
 import QueriesPanel from "./QueriesPanel.jsx";
 import DocumentUpload from "./DocumentUpload.jsx";
+import InvoicesPanel from "./InvoicesPanel.jsx";
 import StrengthBadge from "./StrengthBadge.jsx";
 import AiAssessmentPanel from "./AiAssessmentPanel.jsx";
 import {
@@ -868,7 +869,8 @@ export default function AdminDashboard({ onLogout, onGoHome }) {
             { id: "registrations", label: "4. Registrations (5 Domains)", count: registrations.length, icon: Folder },
             { id: "report-tracking", label: "5. Report Tracking", count: reports.length, icon: Activity },
             { id: "queries-investigation", label: "6. Client Queries", count: null, icon: MessageSquare },
-            { id: "client-documents", label: "7. Client Documents", count: null, icon: FileText }
+            { id: "client-documents", label: "7. Client Documents", count: null, icon: FileText },
+            { id: "invoices", label: "8. Payment Receipts", count: null, icon: DollarSign }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeNav === tab.id;
@@ -1923,6 +1925,11 @@ export default function AdminDashboard({ onLogout, onGoHome }) {
           </motion.div>
         )}
 
+        {activeNav === "invoices" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <InvoicesPanel role="admin" />
+          </motion.div>
+        )}
 
       </main>
 

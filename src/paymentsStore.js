@@ -93,7 +93,10 @@ export function subscribePayments(listener) {
 }
 
 /** Simulate payment success. Marks report paid + writes an invoice. */
-export function payForReport({ reportId, reportName, amount, client, cardLast4, method, currency }) {
+export function payForReport({
+  reportId, reportName, amount, client, clientEmail, clientCompany,
+  cardLast4, method, currency, reportSnapshot,
+}) {
   if (!reportId) throw new Error("reportId required");
   const settings = getReportPayment(reportId);
   const finalAmount = amount ?? settings.price;
@@ -109,19 +112,28 @@ export function payForReport({ reportId, reportName, amount, client, cardLast4, 
     id: `INV-${Date.now().toString(36).toUpperCase()}`,
     reportId,
     reportName: reportName || reportId,
-    client: client || "—",
+    client: client || clientEmail || clientCompany || "—",
+    clientEmail: (clientEmail || "").trim().toLowerCase(),
+    clientCompany: clientCompany || "",
     amount: finalAmount,
     currency: finalCurrency,
     method: method || "CARD",
     cardLast4: cardLast4 || "0000",
     issuedAt: now,
     status: "PAID",
+    reportSnapshot: reportSnapshot || null, // { domain, score, verdict, submittedAt, ... }
   };
   invoices.unshift(invoice);
   writeJson(INVOICES_KEY, invoices);
 
   notify();
   return invoice;
+}
+
+export function listInvoicesForClient(email) {
+  const target = (email || "").trim().toLowerCase();
+  if (!target) return [];
+  return listInvoices().filter((i) => (i.clientEmail || "").toLowerCase() === target);
 }
 
 export function markUnpaid(reportId) {

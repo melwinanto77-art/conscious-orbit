@@ -13,7 +13,7 @@ import { payForReport, getReportPayment, subscribePayments, ALL_METHODS } from "
 
 const onlyDigits = (v) => v.replace(/\D+/g, "");
 
-export default function PaymentModal({ report, client, onClose, onPaid }) {
+export default function PaymentModal({ report, client, clientEmail, onClose, onPaid }) {
   const [settings, setSettings] = useState(() => getReportPayment(report?.id));
   useEffect(() => subscribePayments(() => setSettings(getReportPayment(report?.id))), [report?.id]);
 
@@ -52,12 +52,25 @@ export default function PaymentModal({ report, client, onClose, onPaid }) {
     setBusy(true);
     setTimeout(() => {
       try {
+        const c = (report && typeof report.client === "object") ? report.client : {};
         const inv = payForReport({
           reportId: report.id,
           reportName: report.name || report.reportName,
-          client: client || form.name || form.upi || "—",
+          client: client || form.name || form.upi || c.contact || c.company || "—",
+          clientEmail: clientEmail || c.email || "",
+          clientCompany: c.company || "",
           cardLast4: last4,
           method,
+          reportSnapshot: {
+            domain: report.vertical || report.domain || "",
+            score: report.score ?? null,
+            adminScore: report.adminScore ?? null,
+            decision: report.decision ?? null,
+            status: report.status || "PUBLISHED",
+            submittedAt: report.createdAt || null,
+            publishedAt: report.publishedAt || report.updatedAt || null,
+            problem: (report.clusters && report.clusters.market && report.clusters.market.problem) || "",
+          },
         });
         setInvoice(inv);
         onPaid && onPaid(inv);

@@ -410,6 +410,7 @@ export default function ReportOverview({ report, moduleResults = {}, onClose }) 
         <PaymentModal
           report={report}
           client={client.contact || client.company}
+          clientEmail={client.email || ""}
           onClose={() => setShowPay(false)}
           onPaid={() => { /* invoice recorded; the modal shows a success screen then user closes */ }}
         />
