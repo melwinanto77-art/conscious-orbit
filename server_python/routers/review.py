@@ -6,10 +6,13 @@ from datetime import datetime, timezone
 
 from auth import require_admin
 from database import get_db
-from models import ReportModel, ClientModel
+from models import ReportModel, ClientModel, ModuleResultModel
 from state import assert_transition
 from errors import ApiError
 from integrations.email import send_report_email
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["review"])
 
@@ -68,5 +71,19 @@ def submit_review(report_id: str, body: ReviewRequest, db: Session = Depends(get
     client = db.query(ClientModel).filter(ClientModel.id == report.client_id).first()
 
     email_result = send_report_email(report.to_json(), client.to_json() if client else None)
+
+    # Index this report's insights into the shared knowledge base
+    # so future assessments benefit from this report's data.
+    try:
+        from integrations.pinecone_client import index_report_to_shared_knowledge
+        module_results = db.query(ModuleResultModel).filter(
+            ModuleResultModel.report_id == report_id
+        ).all()
+        report_data = report.to_json()
+        if client:
+            report_data["client"] = client.to_json()
+        index_report_to_shared_knowledge(report_data, module_results)
+    except Exception as e:
+        logger.warning("Shared knowledge indexing failed for %s: %s", report_id, e)
 
     return {"report": report.to_json(), "email": email_result}

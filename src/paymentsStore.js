@@ -78,6 +78,113 @@ export function clearReportPayment(reportId) {
   notify();
 }
 
+// ---------- token packs ----------
+const TOKENS_KEY = "co.tokens";
+
+export const TOKEN_PACKS = [
+  { id: "MONTHLY",  label: "1 Month",  tokens: 3,  price: 999,  durationDays: 30,  perToken: 333 },
+  { id: "SEMI",     label: "6 Months", tokens: 15, price: 3999, durationDays: 183, perToken: 267 },
+  { id: "ANNUAL",   label: "1 Year",   tokens: 30, price: 6999, durationDays: 365, perToken: 233 },
+];
+
+const readTokens = () => readJson(TOKENS_KEY, {});
+
+/** Balance for one client email. Returns { tokens, packId, expiresAt, expired }. */
+export function getTokenBalance(email) {
+  const target = (email || "").trim().toLowerCase();
+  if (!target) return { tokens: 0, packId: null, expiresAt: null, expired: false };
+  const all = readTokens();
+  const row = all[target] || { tokens: 0, packId: null, expiresAt: null };
+  const expired = row.expiresAt ? new Date(row.expiresAt).getTime() < Date.now() : false;
+  return { ...row, expired, tokens: expired ? 0 : (row.tokens || 0) };
+}
+
+/** Purchase a token pack — adds tokens, sets expiry, writes a receipt. */
+export function buyTokenPack({ email, packId, client, cardLast4, method }) {
+  const pack = TOKEN_PACKS.find((p) => p.id === packId);
+  const target = (email || "").trim().toLowerCase();
+  if (!target) throw new Error("email required");
+  if (!pack) throw new Error("invalid pack");
+
+  const all = readTokens();
+  const now = new Date();
+  const current = all[target] || { tokens: 0, packId: null, expiresAt: null };
+  const stillActive = current.expiresAt && new Date(current.expiresAt).getTime() > now.getTime();
+  const carryOver = stillActive ? (current.tokens || 0) : 0;
+  const newExpiry = new Date(Math.max(now.getTime(), stillActive ? new Date(current.expiresAt).getTime() : now.getTime()) + pack.durationDays * 86400000);
+
+  all[target] = {
+    tokens: carryOver + pack.tokens,
+    packId: pack.id,
+    packLabel: pack.label,
+    expiresAt: newExpiry.toISOString(),
+    lastPurchaseAt: now.toISOString(),
+  };
+  writeJson(TOKENS_KEY, all);
+
+  // Record a receipt for the pack purchase
+  const invoices = listInvoices();
+  const invoice = {
+    id: `RCP-${Date.now().toString(36).toUpperCase()}`,
+    reportId: `TOKEN-${pack.id}`,
+    reportName: `Token pack — ${pack.label} (${pack.tokens} tokens)`,
+    client: client || target,
+    clientEmail: target,
+    clientCompany: "",
+    amount: pack.price,
+    currency: "INR",
+    method: method || "CARD",
+    cardLast4: cardLast4 || "0000",
+    issuedAt: now.toISOString(),
+    status: "PAID",
+    reportSnapshot: { kind: "TOKEN_PACK", pack: pack.id, tokens: pack.tokens, expiresAt: newExpiry.toISOString() },
+  };
+  invoices.unshift(invoice);
+  writeJson(INVOICES_KEY, invoices);
+
+  notify();
+  return { balance: all[target], invoice };
+}
+
+/** Spend one token to unlock a report. Returns the new balance and receipt. */
+export function unlockReportWithToken({ email, reportId, reportName, client }) {
+  const target = (email || "").trim().toLowerCase();
+  if (!target) throw new Error("email required");
+  const all = readTokens();
+  const row = all[target];
+  const active = row && row.expiresAt && new Date(row.expiresAt).getTime() > Date.now() && (row.tokens || 0) > 0;
+  if (!active) throw new Error("No active tokens.");
+
+  row.tokens = row.tokens - 1;
+  writeJson(TOKENS_KEY, all);
+
+  const paid = getPaidReports();
+  paid[reportId] = { paidAt: new Date().toISOString(), amount: 0, currency: "INR", method: "TOKEN" };
+  writeJson(PAID_KEY, paid);
+
+  const invoices = listInvoices();
+  const invoice = {
+    id: `RCP-${Date.now().toString(36).toUpperCase()}`,
+    reportId,
+    reportName: reportName || reportId,
+    client: client || target,
+    clientEmail: target,
+    clientCompany: "",
+    amount: 0,
+    currency: "INR",
+    method: "TOKEN",
+    cardLast4: "TKN",
+    issuedAt: new Date().toISOString(),
+    status: "PAID",
+    reportSnapshot: { kind: "TOKEN_REDEMPTION", packId: row.packId },
+  };
+  invoices.unshift(invoice);
+  writeJson(INVOICES_KEY, invoices);
+
+  notify();
+  return { balance: row, invoice };
+}
+
 const notify = () => {
   try { window.dispatchEvent(new CustomEvent("co:payments-changed")); } catch { /* ignore */ }
 };

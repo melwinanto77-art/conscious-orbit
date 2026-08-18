@@ -8,7 +8,7 @@ to_json() on each model emits the exact shape the Express server's
 Mongoose toJSON transform produces, so the frontend cannot tell the two
 backends apart.
 """
-from sqlalchemy import Column, String, Integer, Float, DateTime, JSON, Text, UniqueConstraint
+from sqlalchemy import Column, String, Integer, Float, DateTime, JSON, Text, UniqueConstraint, Boolean
 from datetime import datetime, timezone
 from database import Base
 
@@ -224,6 +224,8 @@ class DocumentModel(Base):
     category = Column(String, default='SUPPORTING')    # PITCH_DECK / FINANCIALS / ...
     note = Column(Text, nullable=True)
     uploaded_by = Column(String, nullable=True)        # client email
+    indexed = Column(Boolean, default=False)            # True after RAG indexing succeeds
+    chunk_count = Column(Integer, default=0)            # number of chunks stored in Pinecone
     created_at = Column(DateTime, default=_utcnow)
 
     def to_json(self):
@@ -236,6 +238,8 @@ class DocumentModel(Base):
             'sizeBytes': self.size_bytes or 0,
             'category': self.category,
             'note': self.note,
+            'indexed': self.indexed or False,
+            'chunkCount': self.chunk_count or 0,
             'uploadedBy': self.uploaded_by,
             'createdAt': _iso(self.created_at),
         }

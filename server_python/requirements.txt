@@ -10,3 +10,11 @@ python-docx>=1.1.0
 # The AI engine (Gemini) is called over plain REST — no SDK dependency.
 # Set GEMINI_API_KEY in .env; without it every AI feature falls back to a
 # deterministic heuristic.
+
+# RAG pipeline - document processing, embedding, and vector search
+langchain>=0.3.0
+langchain-text-splitters>=0.3.0
+pinecone-client>=5.0.0
+PyPDF2>=3.0.0
+openpyxl>=3.1.0
+python-pptx>=1.0.0

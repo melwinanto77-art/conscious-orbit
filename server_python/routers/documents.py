@@ -18,6 +18,11 @@ from auth import is_admin, owner_email, require_user
 from database import get_db
 from errors import ApiError
 from models import DocumentModel
+import logging
+from integrations.document_processor import extract_text, chunk_text, PROCESSABLE_TYPES
+from integrations.pinecone_client import embed_and_store
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["documents"])
 
@@ -89,6 +94,28 @@ async def upload_document(
     db.add(doc)
     db.commit()
     db.refresh(doc)
+
+    # RAG indexing - extract text, chunk, embed, store in Pinecone.
+    # Non-blocking: failures are logged but upload always succeeds.
+    if file.content_type in PROCESSABLE_TYPES:
+        try:
+            saved_path = str(UPLOAD_DIR / stored_name)
+            text = extract_text(saved_path, file.content_type)
+            if text:
+                chunks = chunk_text(text)
+                if chunks:
+                    doc_meta = {
+                        "doc_id": doc.id,
+                        "filename": original,
+                        "category": doc.category,
+                    }
+                    stored = embed_and_store(chunks, doc_meta, reportId or "")
+                    doc.indexed = stored > 0
+                    doc.chunk_count = stored
+                    db.commit()
+        except Exception as e:
+            logger.warning("RAG indexing failed for %s: %s", original, e)
+
     return {"document": doc.to_json()}
 
 

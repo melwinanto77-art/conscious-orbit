@@ -26,6 +26,7 @@ import json
 from scoring import verdict as score_verdict
 from strength import band_for, data_band
 from . import gemini
+from .pinecone_client import query_document_chunks, query_shared_knowledge
 
 # The dimensions the model must mark separately, so a single number can
 # always be traced back to what drove it.
@@ -116,12 +117,75 @@ NON-NEGOTIABLE RULES
 7. dataGaps lists what was never answered. This is what the administrator will ask the
    client for, so be precise and complete.
 8. Write for the administrator: direct, specific, no filler, no hedging platitudes. Name the
-   binding constraint rather than listing generic startup advice."""
+   binding constraint rather than listing generic startup advice.
+9. When cross-report insights from past ventures in the same vertical are provided, use them
+   to identify patterns: what has worked, what has failed, and what the binding constraints
+   typically are for this type of venture. Reference specific past insights when they apply."""
 
 
 def _pretty(value, limit=6000):
     text = json.dumps(value, indent=2, default=str)
     return text if len(text) <= limit else text[:limit] + "\n… (truncated)"
+
+
+def _build_rag_context(report_json: dict, module_results: list) -> str:
+    """Build search query and retrieve relevant chunks from both report docs and shared knowledge.
+
+    Queries two sources:
+    1. Report-specific document chunks (the client's own uploaded files)
+    2. Shared knowledge base (insights from ALL past published reports)
+
+    This means the AI improves with every report processed — it learns from
+    patterns across the entire portfolio, not just the current venture.
+    """
+    clusters = report_json.get("clusters") or {}
+    query_parts = [
+        clusters.get("problem", ""),
+        clusters.get("pain", ""),
+        clusters.get("icp", ""),
+        report_json.get("name", ""),
+        report_json.get("vertical", ""),
+    ]
+    query = " ".join(p for p in query_parts if p)
+
+    if not query.strip():
+        return ""
+
+    context_parts = []
+
+    # 1. Report-specific document chunks
+    report_results = query_document_chunks(query, report_json.get("id", ""), top_k=6)
+    if report_results:
+        context_parts.append("=== DOCUMENTS FROM THIS REPORT ===")
+        for r in report_results:
+            meta = r.get("metadata", {})
+            content = meta.get("page_content", "")
+            if not content:
+                continue
+            context_parts.append(
+                f"[Source: {meta.get('filename', 'unknown')} "
+                f"({meta.get('category', 'unknown')})]\n"
+                f"{content}"
+            )
+
+    # 2. Shared knowledge from past reports (cross-report learning)
+    vertical = report_json.get("vertical", "")
+    shared_results = query_shared_knowledge(query, vertical=vertical, top_k=5)
+    if shared_results:
+        context_parts.append("\n=== INSIGHTS FROM SIMILAR PAST REPORTS ===")
+        for r in shared_results:
+            meta = r.get("metadata", {})
+            content = meta.get("page_content", "")
+            source_type = meta.get("source_type", "unknown")
+            score = meta.get("score", 0)
+            if not content:
+                continue
+            context_parts.append(
+                f"[Past report insight ({source_type}, similarity: {score:.2f})]\n"
+                f"{content}"
+            )
+
+    return "\n\n---\n\n".join(context_parts)
 
 
 def generate_report_assessment(report_json, module_results, documents=None, brand_equity=None):
@@ -145,7 +209,10 @@ def generate_report_assessment(report_json, module_results, documents=None, bran
     client = report_json.get("client")
     client = client if isinstance(client, dict) else {}
 
-    user_prompt = "\n".join([
+    # Retrieve relevant document chunks for grounded analysis
+    rag_context = _build_rag_context(report_json, module_results or [])
+
+    prompt_parts = [
         f"# Venture: {report_json.get('name')}",
         f"Vertical: {report_json.get('vertical')} | Stage: {client.get('stage')} | "
         f"Business model: {client.get('businessModel')} | Geography: {client.get('geography')}",
@@ -170,12 +237,30 @@ def generate_report_assessment(report_json, module_results, documents=None, bran
         "## Supporting documents the client uploaded",
         _pretty(documents or []) if documents else "None uploaded — no third-party evidence to corroborate claims.",
         "",
+    ]
+
+    if rag_context:
+        prompt_parts.extend([
+            "## Document evidence and cross-report insights",
+            rag_context,
+            "",
+            "Use the evidence above to ground your analysis. The first section contains",
+            "documents from THIS report. The second section contains insights from PAST",
+            "reports in the same vertical — use these to identify patterns, common pitfalls,",
+            "and what has worked for similar ventures. When you reference a source, cite it.",
+            "If document evidence contradicts client claims, flag the discrepancy.",
+            "",
+        ])
+
+    prompt_parts.extend([
         "## Indian Brand Equity assessment",
         _pretty(brand_equity) if brand_equity else "Not submitted.",
         "",
         "Produce your assessment. The administrator will weigh it against their own judgement "
         "before deciding the published mark.",
     ])
+
+    user_prompt = "\n".join(prompt_parts)
 
     result = gemini.generate_json(SYSTEM_PROMPT, user_prompt, ASSESSMENT_SCHEMA, max_output_tokens=8192)
     if not result:

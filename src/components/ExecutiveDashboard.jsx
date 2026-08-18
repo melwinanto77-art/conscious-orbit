@@ -6,12 +6,15 @@ import DocumentUpload from "./DocumentUpload.jsx";
 import BrandEquityForm from "./BrandEquityForm.jsx";
 import QueriesPanel from "./QueriesPanel.jsx";
 import InvoicesPanel from "./InvoicesPanel.jsx";
+import TokenPacksModal from "./TokenPacksModal.jsx";
+import { getTokenBalance, subscribePayments } from "../paymentsStore.js";
 import StrengthBadge from "./StrengthBadge.jsx";
 import { StartupMarketEngine, MsmeOptimizationEngine, IndustryAnalysisEngine } from "./VerticalEngines.jsx";
 import IntakeEngine from "./IntakeEngine.jsx";
 import {
   Search,
   Bell,
+  Coins,
   LogOut,
   HelpCircle,
   Sparkles,
@@ -431,6 +434,12 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
   const [isViewProjectsModalOpen, setIsViewProjectsModalOpen] = useState(false);
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isTokensOpen, setIsTokensOpen] = useState(false);
+  const [tokenBalance, setTokenBalance] = useState(() => getTokenBalance(userEmail));
+  useEffect(() => {
+    setTokenBalance(getTokenBalance(userEmail));
+    return subscribePayments(() => setTokenBalance(getTokenBalance(userEmail)));
+  }, [userEmail]);
   /* Answered questions show up as notifications, so the client learns a
      reply arrived without opening the Queries tab. */
   const [answeredQueries, setAnsweredQueries] = useState([]);
@@ -679,7 +688,7 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
                 gtm: newProjectForm.gtmStrategy,
                 milestones: newProjectForm.milestones,
                 ask: newProjectForm.capitalRequired
-                  ? `USD ${Number(newProjectForm.capitalRequired).toLocaleString()}`
+                  ? `₹${Number(newProjectForm.capitalRequired).toLocaleString()}`
                   : "",
               },
             },
@@ -835,6 +844,22 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
                 </button>
               )}
             </div>
+
+            {/* Report Tokens */}
+            <button
+              type="button"
+              onClick={() => setIsTokensOpen(true)}
+              className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-[#D4AF37]/50 bg-[#FAF4E8] hover:bg-[#F5EAD4] text-[#4A0A13] transition cursor-pointer"
+              title={tokenBalance.tokens > 0
+                ? `${tokenBalance.tokens} token${tokenBalance.tokens === 1 ? "" : "s"} · valid until ${new Date(tokenBalance.expiresAt).toLocaleDateString()}`
+                : "Buy a token pack — 1 month / 6 months / 1 year"}
+            >
+              <Coins size={16} className="text-[#B8860B]" />
+              <span className="text-xs font-bold">{tokenBalance.tokens || 0}</span>
+              {(tokenBalance.tokens || 0) === 0 && (
+                <span className="text-[0.55rem] uppercase font-bold text-[#B8860B] tracking-wider">buy</span>
+              )}
+            </button>
 
             {/* Notification Bell Dropdown */}
             <div className="relative">
@@ -1060,16 +1085,6 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
                   )}
                 </AnimatePresence>
               </div>
-
-              {/* BUTTON 3: New Project Analysis Action */}
-              <button
-                onClick={() => setIsNewProjectModalOpen(true)}
-                type="button"
-                className="flex items-center gap-2 bg-[#5C0F1A] hover:bg-[#7A1C29] border border-[#D4AF37]/50 active:scale-[0.98] text-[#FAF4E8] font-extrabold px-4 sm:px-5 py-2.5 rounded-xl shadow-md transition-all cursor-pointer text-xs tracking-wide"
-              >
-                <Sparkles size={14} className="text-[#F5D77F]" />
-                <span>+ New Project Analysis</span>
-              </button>
 
             </div>
 
@@ -1944,7 +1959,7 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
                   {wizardStep === 3 && (
                     <div className="space-y-4">
                       <ReqNumber
-                        label="Total addressable market (TAM, USD)"
+                        label="Total addressable market (TAM, ₹)"
                         value={newProjectForm.tam}
                         onChange={(v) => setNewProjectForm({ ...newProjectForm, tam: v })}
                         placeholder="e.g. 500000000"
@@ -1993,7 +2008,7 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <ReqNumber
-                          label="Your monthly price (USD)"
+                          label="Your monthly price (₹)"
                           value={newProjectForm.ourPrice}
                           onChange={(v) => setNewProjectForm({ ...newProjectForm, ourPrice: v })}
                           placeholder="e.g. 2500"
@@ -2039,7 +2054,7 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <ReqNumber
-                          label="Capital required (USD)"
+                          label="Capital required (₹)"
                           value={newProjectForm.capitalRequired}
                           onChange={(v) => setNewProjectForm({ ...newProjectForm, capitalRequired: v })}
                           placeholder="e.g. 1200000"
@@ -2055,13 +2070,13 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <ReqNumber
-                          label="Expected annual return (USD)"
+                          label="Expected annual return (₹)"
                           value={newProjectForm.expectedAnnualReturn}
                           onChange={(v) => setNewProjectForm({ ...newProjectForm, expectedAnnualReturn: v })}
                           placeholder="e.g. 480000"
                         />
                         <ReqNumber
-                          label="Monthly marketing budget (USD)"
+                          label="Monthly marketing budget (₹)"
                           value={newProjectForm.monthlyMarketingBudget}
                           onChange={(v) => setNewProjectForm({ ...newProjectForm, monthlyMarketingBudget: v })}
                           placeholder="e.g. 12000"
@@ -2143,6 +2158,14 @@ export default function ExecutiveDashboard({ onLogout, onGoHome, userEmail }) {
           />
         )}
       </AnimatePresence>
+
+      {isTokensOpen && (
+        <TokenPacksModal
+          clientEmail={userEmail}
+          clientName={emailName}
+          onClose={() => setIsTokensOpen(false)}
+        />
+      )}
 
     </div>
   );

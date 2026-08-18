@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { X, Download, FileText, CheckCircle2, AlertTriangle, ArrowRight, Lock, CreditCard } from "lucide-react";
 import { downloadReportDoc } from "../reportDoc.js";
 import { downloadReportDocx } from "../api.js";
-import { isReportPaid, subscribePayments, getReportPayment } from "../paymentsStore.js";
+import { isReportPaid, subscribePayments, getReportPayment, getTokenBalance, unlockReportWithToken } from "../paymentsStore.js";
+import { Coins } from "lucide-react";
 import PaymentModal from "./PaymentModal.jsx";
 
 /* ============================================================
@@ -80,16 +81,20 @@ export default function ReportOverview({ report, moduleResults = {}, onClose }) 
   const [paid, setPaid] = useState(() => isReportPaid(report.id));
   const [payment, setPayment] = useState(() => getReportPayment(report.id));
   const [showPay, setShowPay] = useState(false);
+  const clientEmail = (client && client.email) || "";
+  const [tokenBal, setTokenBal] = useState(() => getTokenBalance(clientEmail));
   useEffect(() => {
     setPaid(isReportPaid(report.id));
     setPayment(getReportPayment(report.id));
+    setTokenBal(getTokenBalance(clientEmail));
     return subscribePayments(() => {
       setPaid(isReportPaid(report.id));
       setPayment(getReportPayment(report.id));
+      setTokenBal(getTokenBalance(clientEmail));
     });
-  }, [report.id]);
+  }, [report.id, clientEmail]);
   const isDemo = !pending && !paid && !payment.free;
-  const currencySymbol = payment.currency === "INR" ? "₹" : payment.currency === "EUR" ? "€" : "$";
+  const currencySymbol = "₹";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
@@ -156,13 +161,41 @@ export default function ReportOverview({ report, moduleResults = {}, onClose }) 
                 <p className="text-[0.6rem] uppercase font-bold text-[#8C6D58] tracking-wider">One-time</p>
               </div>
             </div>
-            <button
-              onClick={() => setShowPay(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#400A12] hover:bg-[#5C0F1A] text-[#F5D77F] font-extrabold text-sm cursor-pointer border border-[#D4AF37]/40"
-            >
-              <CreditCard size={14} />
-              <span>Pay {currencySymbol}{payment.price} to unlock full report</span>
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={() => setShowPay(true)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#400A12] hover:bg-[#5C0F1A] text-[#F5D77F] font-extrabold text-sm cursor-pointer border border-[#D4AF37]/40"
+              >
+                <CreditCard size={14} />
+                <span>Pay {currencySymbol}{payment.price}</span>
+              </button>
+              {tokenBal.tokens > 0 && (
+                <button
+                  onClick={() => {
+                    if (!window.confirm(`Use 1 token to unlock this report? You have ${tokenBal.tokens} left.`)) return;
+                    try {
+                      unlockReportWithToken({
+                        email: clientEmail,
+                        reportId: report.id,
+                        reportName: report.name,
+                        client: client.contact || client.company,
+                      });
+                    } catch (err) {
+                      alert(err.message || "Could not use token.");
+                    }
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#F5D77F] text-[#400A12] font-extrabold text-sm cursor-pointer border border-[#400A12]/30"
+                >
+                  <Coins size={14} />
+                  <span>Use 1 token ({tokenBal.tokens} left)</span>
+                </button>
+              )}
+            </div>
+            {tokenBal.tokens === 0 && (
+              <p className="text-[0.65rem] text-[#7A1C29] text-center">
+                Have a token pack? Buy one from the <Coins size={10} className="inline" /> button in the header.
+              </p>
+            )}
           </div>
 
           {/* Sample preview — shows what the unlocked report looks like, blurred */}

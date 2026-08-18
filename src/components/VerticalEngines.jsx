@@ -59,7 +59,7 @@ export function StartupMarketEngine() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr]">
         {/* Inputs */}
         <Panel className="space-y-4">
-          <EngineField label="Total Addressable Market (TAM) — USD">
+          <EngineField label="Total Addressable Market (TAM) — INR">
             <input type="number" className={fieldCls} value={tam} onChange={(e) => setTam(parseInt(e.target.value) || 0)} />
           </EngineField>
           <EngineField label={`Serviceable % of TAM — ${samPct}%`} hint="Share of TAM your model can actually reach">
@@ -91,9 +91,9 @@ export function StartupMarketEngine() {
           <h4 className="font-serif text-base font-bold text-[#400A12]">Converted Market Sizing</h4>
 
           <div className="space-y-3">
-            <MetricBar label="TAM (Total Addressable)" val={`$${tam.toLocaleString()}`} pct={100} color="bg-[#D4AF37]" />
-            <MetricBar label="SAM (Serviceable)" val={`$${sam.toLocaleString()}`} pct={samPct} color="bg-[#B8860B]" />
-            <MetricBar label="SOM (Obtainable)" val={`$${som.toLocaleString()}`} pct={Math.max(3, Math.round((som / Math.max(tam, 1)) * 100))} color="bg-emerald-500" />
+            <MetricBar label="TAM (Total Addressable)" val={`₹${tam.toLocaleString()}`} pct={100} color="bg-[#D4AF37]" />
+            <MetricBar label="SAM (Serviceable)" val={`₹${sam.toLocaleString()}`} pct={samPct} color="bg-[#B8860B]" />
+            <MetricBar label="SOM (Obtainable)" val={`₹${som.toLocaleString()}`} pct={Math.max(3, Math.round((som / Math.max(tam, 1)) * 100))} color="bg-emerald-500" />
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-3">
@@ -145,7 +145,7 @@ export function MsmeOptimizationEngine() {
           <EngineField label={`Average Delay per Cycle — ${delayDays} Days`}>
             <input type="range" min={1} max={60} value={delayDays} onChange={(e) => setDelayDays(parseInt(e.target.value))} className="w-full accent-[#400A12] cursor-pointer" />
           </EngineField>
-          <EngineField label="Monthly Operational Spend (USD)">
+          <EngineField label="Monthly Operational Spend (₹)">
             <input type="number" className={fieldCls} value={monthlySpend} onChange={(e) => setMonthlySpend(parseInt(e.target.value) || 0)} />
           </EngineField>
         </Panel>
@@ -154,7 +154,7 @@ export function MsmeOptimizationEngine() {
           <h4 className="font-serif text-base font-bold text-[#400A12]">Diagnostic Findings</h4>
 
           <div className="grid grid-cols-2 gap-3">
-            <SavingsCard icon={PiggyBank} label="Potential Savings / Mo" value={`$${potentialSavings.toLocaleString()}`} />
+            <SavingsCard icon={PiggyBank} label="Potential Savings / Mo" value={`₹${potentialSavings.toLocaleString()}`} />
             <SavingsCard icon={Clock} label="Estimated Payback" value={`${paybackMonths} Mo`} />
           </div>
 

@@ -7,7 +7,7 @@
    behaviour, so the app stays usable with no backend running.
    ============================================================ */
 
-export const API_BASE = (import.meta.env?.VITE_API_URL || 'http://localhost:8000/api').replace(/\/$/, '');
+export const API_BASE = (import.meta.env?.VITE_API_URL || 'http://localhost:8001/api').replace(/\/$/, '');
 
 /** Thrown when the server answered but rejected the request. */
 export class ApiError extends Error {
@@ -384,7 +384,7 @@ export function buildModuleInputs({ profile, clusters, vertical, tracks = [], cu
 
     marketSize: {
       tam: Math.max(1, answered(req.tam, 500_000_000)),
-      currency: 'USD',
+      currency: 'INR',
       samPercent: pct(req.samPercent, 18),
       channelMix: { direct: 30, partner: 20, online: 25 },
       conversionRate: pct(req.conversionRate, isConsumer ? 3 : 12),
@@ -410,7 +410,7 @@ export function buildModuleInputs({ profile, clusters, vertical, tracks = [], cu
       ourPrice: wtp,
       ourModel: isConsumer ? 'subscription' : 'tiered',
       ourFeatures: customModules,
-      currency: 'USD',
+      currency: 'INR',
       // User-supplied competitor bracket when given; otherwise bracket our own
       // price so the comparison is at least directionally meaningful.
       competitors: [
@@ -442,7 +442,7 @@ export function buildModuleInputs({ profile, clusters, vertical, tracks = [], cu
         founderMonthsCommitted: 24,
         expectedAnnualReturn: answered(req.expectedAnnualReturn, capital * 0.4),
       },
-      currency: 'USD',
+      currency: 'INR',
     },
 
     gtm: {
@@ -469,7 +469,7 @@ export function buildModuleInputs({ profile, clusters, vertical, tracks = [], cu
           owner: profile.contact?.trim() || 'Founder',
           keyResults: [
             { description: 'Signed pilot accounts', metric: 'accounts', baseline: 0, target: 10, current: 2, unit: 'count' },
-            { description: 'Monthly recurring revenue', metric: 'MRR', baseline: 0, target: wtp * 10, current: 0, unit: 'USD' },
+            { description: 'Monthly recurring revenue', metric: 'MRR', baseline: 0, target: wtp * 10, current: 0, unit: 'INR' },
           ],
         },
         {
